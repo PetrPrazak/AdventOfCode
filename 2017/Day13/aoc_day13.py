@@ -18,13 +18,9 @@ def solve(lines):
 
     # part 2
     for d in range(0, 10000000, 2):
-        stop = False
-        for n in layers:
-            # we don't need to build whole list of stops
-            if not (n + d) % ((layers[n] - 1) * 2):
-                stop = True
-                break
-        if not stop:
+        try:
+            next(iter(n for n in layers if not (n + d) % ((layers[n] - 1) * 2)))
+        except StopIteration:
             print(d)
             break
 
