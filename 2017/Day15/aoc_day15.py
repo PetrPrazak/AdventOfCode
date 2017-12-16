@@ -9,8 +9,7 @@ from __future__ import print_function
 # Generator B starts with 583
 
 
-def gen(init, mult, mod=1):
-    val = init
+def gen(val, mult, mod=1):
     while 1:
         val = val * mult % 2147483647   # 2 ** 31 - 1
         if (val % mod) == 0:
