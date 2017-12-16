@@ -12,6 +12,12 @@ x3/4, swapping the last two programs: eabdc.
 pe/b, swapping programs e and b: baedc.
 """
 
+# make the script version agnostic
+try:
+    xrange
+except NameError:
+    xrange = range
+
 
 def solve(data):
     moves = data.strip().split(',')
@@ -20,9 +26,9 @@ def solve(data):
 
 
 def dance(reps, moves):
-    row = [chr(x) for x in range(ord('a'), ord('p') + 1)]
+    row = [chr(ord('a') + x) for x in range(16)]
     positions = []
-    for i in range(reps):
+    for i in xrange(reps):
         s = "".join(row)
         if s in positions:
             print(i, positions[reps % i])
