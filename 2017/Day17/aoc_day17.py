@@ -69,29 +69,24 @@ def solve(steplen):
 
 def solve1(steplen):
     ring = [0]
-    ringlen = 1
     pos = 0
     for i in xrange(1, 2017 + 1):
-        pos = (pos + steplen) % ringlen
+        pos = (pos + steplen) % i
         ring.insert(pos + 1, i)
-        ringlen += 1
         pos += 1
 
-    pos = (pos + 1) % ringlen
+    pos = (pos + 1) % (i + 1)
     print(ring[pos])
 
 
 def solve2(maxcycle, steplen):
-    ringlen = 1
     pos = 0
     afterzero = 0
     for i in xrange(1, maxcycle + 1):
-        pos = (pos + steplen) % ringlen
+        pos = (pos + steplen) % i
         if pos == 0:
             afterzero = i
-        ringlen += 1
         pos += 1
-
     print(afterzero)
 
 
