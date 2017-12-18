@@ -15,7 +15,7 @@ def solve(lines):
 
 
 def part1(prog):
-    p = DuetVM(prog, 0, None, None)
+    p = DuetVM(prog)
     while True:
         if not p.step():
             break
@@ -32,7 +32,7 @@ def part2(prog):
 
 
 class DuetVM(object):
-    def __init__(self, prog, pid, qin, qout):
+    def __init__(self, prog, pid=0, qin=None, qout=None):
         self.regs = defaultdict(int)
         self.prog = prog
         self.pid = pid
