@@ -6,8 +6,6 @@ http://adventofcode.com/2017/day/18
 from __future__ import print_function
 from collections import defaultdict, deque
 
-sends = [0, 0]
-
 
 def solve(lines):
     prog = [x.strip().split() for x in lines]
@@ -17,57 +15,55 @@ def solve(lines):
 
 
 def part2(prog):
-    regset = [defaultdict(int), defaultdict(int)]
     queue = [deque(), deque()]
-
-    regset[0]['p'] = 0
-    regset[1]['p'] = 1
-
+    p0, p1 = DuetVM(prog, 0, queue[0], queue[1]), DuetVM(prog, 1, queue[1], queue[0])
     while True:
-        if not step(prog, 0, regset[0], queue[0], queue[1]) and \
-           not step(prog, 1, regset[1], queue[1], queue[0]):
+        if not p0.step() and not p1.step():
             break
+    print(p1.sent)
 
-    print(regset[1]['sent'])
 
+class DuetVM(object):
+    def __init__(self, prog, pid, qin, qout):
+        self.regs = defaultdict(int)
+        self.prog = prog
+        self.pid = pid
+        self.quein = qin
+        self.queout = qout
+        self.regs['p'] = pid
+        self.sent = 0
 
-def step(prog, pid, regs, qin, qout):
-    pos = regs['pc']
-    if not (0 <= pos < len(prog)):
-        print(pid, "Out of bounds:", pos)
-        return False
-    p = prog[pos]
-    # print(regs)
-    cmd, val = p[0], p[1]
-    arg = 0
-    if len(p) > 2:
-        y = p[2]
-        arg = regs[y] if y[0] >= 'a' else int(y)
-    if cmd == "snd":
-        y = val
-        arg = regs[y] if y[0] >= 'a' else int(y)
-        qout.append(arg)
-        regs['sent'] += 1
-    elif cmd == "rcv":
-        if not qin:
+    def getval(self, arg):
+        return self.regs[arg] if arg[0].isalpha() else int(arg)
+
+    def step(self):
+        pos = self.regs['pc']
+        if not (0 <= pos < len(self.prog)):
             return False
-        regs[val] = qin.popleft()
-    elif cmd == "set":
-        regs[val] = arg
-    elif cmd == "add":
-        regs[val] += arg
-    elif cmd == "mul":
-        regs[val] *= arg
-    elif cmd == "mod":
-        regs[val] %= arg
-    elif cmd == "jgz":
-        cond = regs[val] if val[0] >= 'a' else int(val)
-        if cond > 0:
-            pos += arg - 1
-    pos += 1
+        p = self.prog[pos]
+        cmd, arg1 = p[0], p[1]
+        if cmd == "snd":
+            self.queout.append(self.getval(arg1))
+            self.sent += 1
+        elif cmd == "rcv":
+            if not self.quein:
+                return False
+            self.regs[arg1] = self.quein.popleft()
+        elif cmd == "set":
+            self.regs[arg1] = self.getval(p[2])
+        elif cmd == "add":
+            self.regs[arg1] += self.getval(p[2])
+        elif cmd == "mul":
+            self.regs[arg1] *= self.getval(p[2])
+        elif cmd == "mod":
+            self.regs[arg1] %= self.getval(p[2])
+        elif cmd == "jgz":
+            if self.getval(arg1) > 0:
+                pos += self.getval(p[2]) - 1
+        pos += 1
 
-    regs['pc'] = pos
-    return True
+        self.regs['pc'] = pos
+        return True
 
 
 def part1(prog):
