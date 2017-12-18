@@ -14,6 +14,14 @@ def solve(lines):
     part2(prog)
 
 
+def part1(prog):
+    p = DuetVM(prog, 0, None, None)
+    while True:
+        if not p.step():
+            break
+    print(p.lastsent)
+
+
 def part2(prog):
     queue = [deque(), deque()]
     p0, p1 = DuetVM(prog, 0, queue[0], queue[1]), DuetVM(prog, 1, queue[1], queue[0])
@@ -32,6 +40,7 @@ class DuetVM(object):
         self.queout = qout
         self.regs['p'] = pid
         self.sent = 0
+        self.lastsent = 0
 
     def getval(self, arg):
         return self.regs[arg] if arg[0].isalpha() else int(arg)
@@ -43,7 +52,10 @@ class DuetVM(object):
         p = self.prog[pos]
         cmd, arg1 = p[0], p[1]
         if cmd == "snd":
-            self.queout.append(self.getval(arg1))
+            if self.queout is not None:
+                self.queout.append(self.getval(arg1))
+            else:
+                self.lastsent = self.getval(arg1)
             self.sent += 1
         elif cmd == "rcv":
             if not self.quein:
@@ -64,43 +76,6 @@ class DuetVM(object):
 
         self.regs['pc'] = pos
         return True
-
-
-def part1(prog):
-    lastsnd = 0
-    pos = 0
-    regs = defaultdict(int)
-    while True:
-        p = prog[pos]
-        cmd, val = p[0], p[1]
-        arg = 0
-        if len(p) > 2:
-            y = p[2]
-            arg = regs[y] if y[0] >= 'a' else int(y)
-
-        if cmd == "snd":
-            y = val
-            arg = regs[y] if y[0] >= 'a' else int(y)
-            lastsnd = arg
-        elif cmd == "rcv":
-            if regs[val]:
-                break
-        elif cmd == "set":
-            regs[val] = arg
-        elif cmd == "add":
-            regs[val] += arg
-        elif cmd == "mul":
-            regs[val] *= arg
-        elif cmd == "mod":
-            regs[val] %= arg
-        elif cmd == "jgz":
-            cond = regs[val] if val[0] >= 'a' else int(val)
-            if cond > 0:
-                pos += arg - 1
-
-        pos += 1
-
-    print(lastsnd)
 
 
 INPUT = "aoc_day18_input.txt"
