@@ -46,11 +46,16 @@ def solve(lines):
     print(steps, path)
 
 
-# INPUT = "aoc_day19_input.txt"
-INPUT = "aoc_day19_test.txt"
+INPUT = "aoc_day19_input.txt"
+# INPUT = "aoc_day19_test.txt"
 
-if __name__ == "__main__":
+
+def main():
     with open(INPUT) as f:
         # read by lines
         lines = f.readlines()
         solve(lines)
+
+
+if __name__ == "__main__":
+    main()
