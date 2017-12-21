@@ -7,15 +7,15 @@ from __future__ import print_function
 from collections import defaultdict, Counter
 
 """
-AB   CA   DC    BD
-CD   DB   BA    AC
+AB   CA   DC   BD
+CD   DB   BA   AC
 """
 
 rot2 = [(0, 1, 2, 3), (2, 0, 3, 1), (3, 2, 1, 0), (1, 3, 0, 2)]
 
 """
-AB  BA  CD
-CD  DC  AB
+AB   BA   CD
+CD   DC   AB
 """
 flip2 = [(0, 1, 2, 3), (1, 0, 3, 2), (2, 3, 0, 1)]
 
@@ -60,26 +60,28 @@ def enumgrid(grid):
         raise ValueError("grid not divisible by 2 or 3")
 
 
-def solve(lines):
+def parse_input(lines):
     mappings = dict()
     for line in lines:
         part = line.strip().split(" => ")
-        match = part[0]
-        if len(match) == 5:  # 2x2
-            match = match.replace('/', '')
+        match = part[0].replace('/', '')
+        if len(match) == 4:  # 2x2
             for f in flip2:
                 flip = "".join(match[f[x]] for x in range(4))
                 for r in rot2:
                     s = "".join(flip[r[x]] for x in range(4))
                     mappings[s] = part[1]
-
-        elif len(match) == 11:  # 3x3
-            match = match.replace('/', '')
+        elif len(match) == 9:  # 3x3
             for f in flip3:
                 flip = "".join(match[f[x]] for x in range(9))
                 for r in rot3:
                     s = "".join(flip[r[x]] for x in range(9))
                     mappings[s] = part[1]
+    return mappings
+
+
+def solve(lines):
+    mappings = parse_input(lines)
 
     for part, rep in enumerate([5, 18]):
         # start position
@@ -99,6 +101,7 @@ def solve(lines):
                 for l in sorted(newgrid.keys()):
                     grid.append(newgrid[l])
 
+        # count hash signs
         c = Counter()
         for r in grid:
             c.update(r)
