@@ -42,6 +42,24 @@ flip3 = [(0, 1, 2, 3, 4, 5, 6, 7, 8),
          (6, 7, 8, 3, 4, 5, 0, 1, 2)]
 
 
+def enumgrid(grid):
+    if len(grid) % 2 == 0:
+        for x in range(len(grid) // 2):
+            for y in range(len(grid[0]) // 2):
+                a, b = x * 2, y * 2
+                subgrid = "".join(grid[a + x][b + y] for x in range(2) for y in range(2))
+                yield x, y, subgrid
+
+    elif len(grid) % 3 == 0:
+        for x in range(len(grid) // 3):
+            for y in range(len(grid[0]) // 3):
+                a, b = x * 3, y * 3
+                subgrid = "".join(grid[a + x][b + y] for x in range(3) for y in range(3))
+                yield x, y, subgrid
+    else:
+        raise ValueError("grid not divisible by 2 or 3")
+
+
 def solve(lines):
     mappings = dict()
     for line in lines:
@@ -53,7 +71,6 @@ def solve(lines):
                 flip = "".join(match[f[x]] for x in range(4))
                 for r in rot2:
                     s = "".join(flip[r[x]] for x in range(4))
-                    s = s[0:2] + '/' + s[2:]
                     mappings[s] = part[1]
 
         elif len(match) == 11:  # 3x3
@@ -62,55 +79,30 @@ def solve(lines):
                 flip = "".join(match[f[x]] for x in range(9))
                 for r in rot3:
                     s = "".join(flip[r[x]] for x in range(9))
-                    s = s[0:3] + '/' + s[3:6] + '/' + s[6:]
                     mappings[s] = part[1]
 
-    for part, rep in enumerate([5,18]):
+    for part, rep in enumerate([5, 18]):
         # start position
         grid = [".#.", "..#", "###"]
         for _ in range(rep):
             newgrid = defaultdict(str)
-
-            if len(grid) % 2 == 0:
-                for x in range(len(grid) // 2):
-                    for y in range(len(grid[0]) // 2):
-                        a, b = (x * 2, y * 2)
-
-                        subgrid = grid[a][b] + grid[a][b + 1] + '/' + grid[a + 1][b] + grid[a + 1][b + 1]
-                        if subgrid in mappings:
-                            newsubgrid = mappings[subgrid]
-                            for l, s in enumerate(newsubgrid.split('/')):
-                                newgrid[x * 3 + l] += s
-                        else:
-                            print("Subgrid not found", subgrid)
-
-            elif len(grid) % 3 == 0:
-                for x in range(len(grid) // 3):
-                    for y in range(len(grid[0]) // 3):
-                        a, b = (x * 3, y * 3)
-                        subgrid = grid[a][b] + grid[a][b + 1] + grid[a][b + 2] + '/' \
-                                  + grid[a + 1][b] + grid[a + 1][b + 1] + grid[a + 1][b + 2] + '/' \
-                                  + grid[a + 2][b] + grid[a + 2][b + 1] + grid[a + 2][b + 2]
-                        if subgrid in mappings:
-                            newsubgrid = mappings[subgrid]
-                            for l, s in enumerate(newsubgrid.split('/')):
-                                newgrid[x * 4 + l] += s
-                        else:
-                            print("Subgrid not found", subgrid)
-            else:
-                print("not divisible by 2 or 3!")
+            for x, y, subgrid in enumgrid(grid):
+                if subgrid in mappings:
+                    newsubgrid = mappings[subgrid].split('/')
+                    for l, s in enumerate(newsubgrid):
+                        newgrid[x * len(newsubgrid) + l] += s
+                else:
+                    print("Subgrid not found!", subgrid)
 
             if newgrid:
                 grid = []
                 for l in sorted(newgrid.keys()):
                     grid.append(newgrid[l])
 
-            # print("Grid:")
-            # for s in grid:
-            #     print(s)
-            # print()
-
-        print(part+1, Counter("".join(grid))['#'])
+        c = Counter()
+        for r in grid:
+            c.update(r)
+        print(part + 1, c['#'])
 
 
 INPUT = "aoc_day21_input.txt"
