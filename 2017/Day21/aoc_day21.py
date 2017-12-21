@@ -43,16 +43,19 @@ flip3 = [(0, 1, 2, 3, 4, 5, 6, 7, 8),
 
 
 def enumgrid(grid):
-    if len(grid) % 2 == 0:
-        for x in range(len(grid) // 2):
-            for y in range(len(grid[0]) // 2):
+    size = len(grid)
+    if size % 2 == 0:
+        blocks = size // 2
+        for x in range(blocks):
+            for y in range(blocks):
                 a, b = x * 2, y * 2
                 subgrid = "".join(grid[a + x][b + y] for x in range(2) for y in range(2))
                 yield x, y, subgrid
 
-    elif len(grid) % 3 == 0:
-        for x in range(len(grid) // 3):
-            for y in range(len(grid[0]) // 3):
+    elif size % 3 == 0:
+        blocks = size // 3
+        for x in range(blocks):
+            for y in range(blocks):
                 a, b = x * 3, y * 3
                 subgrid = "".join(grid[a + x][b + y] for x in range(3) for y in range(3))
                 yield x, y, subgrid
