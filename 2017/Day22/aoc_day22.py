@@ -9,80 +9,42 @@ from collections import defaultdict
 
 
 def solve(lines):
-    part1(lines)
-    part2(lines)
-
-
-def part1(lines):
-    total = 0
     inp = [list(line.strip()) for line in lines]
-    # print(inp)
     grid = defaultdict(lambda: '.')
     for i, l in enumerate(inp):
         for j, node in enumerate(inp[i]):
             grid[(j, i)] = l[j]
 
-    # print(grid)
-    y = (len(inp) + 1) // 2 - 1
-    x = (len(inp[y]) + 1) // 2 - 1
+    starty = len(inp) // 2
+    startx = len(inp[starty]) // 2
 
-    d = 0
-    dirs = [(0, -1), (1, 0), (0, 1), (-1, 0)]
-    states = ['.', 'W', 'I', 'F']
-    dirtext = ['U', 'R', 'D', 'L']
+    states = ['.', '#']
+    rotations = [3, 1]
+    walk(startx, starty, grid.copy(), states, rotations, 10000)
 
+    states = ['.', 'W', '#', 'F']
+    rotations = [3, 0, 1, 2]
+    walk(startx, starty, grid.copy(), states, rotations, 10000000)
+
+
+# increments of coordinates for each direction
+# UP, RIGHT, DOWN, LEFT
+dirs = [(0, -1), (1, 0), (0, 1), (-1, 0)]
+
+
+def walk(x, y, grid, states, rotations, reps):
+    d = 0  # Up
     count = 0
-    for _ in range(10000):
-
+    for _ in range(reps):
         node = grid[(x, y)]
-        if node == '.':
-            count += 1
-            grid[(x, y)] = '#'
-            d = (d - 1) % 4
-        else:
-            grid[(x, y)] = '.'
-            d = (d + 1) % 4
-
-        # print(x,y,node, dirtext[d])
+        idx = states.index(node)
+        nextstate = states[(idx + 1) % len(states)]
+        grid[(x, y)] = nextstate
+        d = (d + rotations[idx]) % 4
         dx, dy = dirs[d]
         x, y = x + dx, y + dy
-
-    print(count)
-
-
-def part2(lines):
-    inp = [list(line.strip()) for line in lines]
-    grid = defaultdict(int)
-    for i, l in enumerate(inp):
-        for j, node in enumerate(inp[i]):
-            grid[(j, i)] = 0 if l[j] == '.' else 2
-
-    y = (len(inp) + 1) // 2 - 1
-    x = (len(inp[y]) + 1) // 2 - 1
-
-    d = 0
-    dirs = [(0, -1), (1, 0), (0, 1), (-1, 0)]
-    states = ['.', 'W', 'I', 'F']
-    dirtext = ['U', 'R', 'D', 'L']
-
-    count = 0
-    for _ in range(10000000):
-
-        node = grid[(x, y)]
-        if node == 0:
-            d = (d + 3) % 4
-        elif node == 1:
+        if nextstate == '#':
             count += 1
-            pass
-        elif node == 2:
-            d = (d + 1) % 4
-        elif node == 3:
-            d = (d + 2) % 4
-
-        grid[(x, y)] = (node + 1) % 4
-        # print(x, y, states[node], dirtext[d])
-        dx, dy = dirs[d]
-        x, y = x + dx, y + dy
 
     print(count)
 
