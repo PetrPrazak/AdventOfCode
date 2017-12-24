@@ -1,7 +1,5 @@
 """
-
 http://adventofcode.com/2017/day/24
-
 
 """
 from __future__ import print_function
@@ -12,12 +10,12 @@ def nextlink(ports, port, path, paths):
     atend = True
     for p, i in ports[port]:
         if i not in path:
-            l = path.copy()
+            l = path[:]
             l.append(i)
             nextlink(ports, p, l, paths)
             atend = False
     if atend:
-        paths.append(path.copy())
+        paths.append(path[:])
 
 
 def solve(lines):
