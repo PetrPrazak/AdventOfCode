@@ -4,6 +4,7 @@ http://adventofcode.com/2017/day/24
 """
 from __future__ import print_function
 from collections import defaultdict
+from time import time
 
 
 def nextlink(ports, port, path, paths):
@@ -47,10 +48,13 @@ INPUT = "aoc_day24_input.txt"
 
 
 def main():
+    start = time()
     with open(INPUT) as f:
         # read by lines
         lines = f.readlines()
         solve(lines)
+    end = time()
+    print("Solved in {:.3f} s".format(end - start))
 
 
 if __name__ == "__main__":
