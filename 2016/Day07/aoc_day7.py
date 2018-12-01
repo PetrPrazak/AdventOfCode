@@ -1,18 +1,14 @@
 from __future__ import print_function
-from collections import Counter, defaultdict
 
 
 def find_abba(word):
-    for p in range(len(word)-3):
-        abba = word[p:p+4]
+    for p in range(len(word) - 3):
+        abba = word[p:p + 4]
         # print(abba)
         if abba[0] == abba[3] and abba[1] == abba[2] and abba[0] != abba[1]:
             return abba
     return None
 
-# import re
-#
-# REGEX = re.compile(r'([a-z]+)(\[([a-z]+)\]([a-z]+))+')
 
 def check_parts(parts):
     has_abba = False
@@ -26,51 +22,51 @@ def check_parts(parts):
 
 
 def solve(lines):
-    sum = 0
+    suma = 0
     for line in lines:
         parts = [w.split('[') for w in line.strip().split(']')]
         if check_parts(parts):
-            sum += 1
-    print(sum)
+            suma += 1
+    print(suma)
 
 
-def get_abas(word):
-    abas = []
-    for p in range(len(word)-2):
-        a = word[p:p+3]
+def abas(word):
+    for p in range(len(word) - 2):
+        a = word[p:p + 3]
         if a[0] == a[2] and a[0] != a[1]:
-            abas.append(a)
-    return abas
+            yield a
 
 
-def check_parts2(parts, line):
-
-    for part in parts:
-        abas = get_abas(part[0])
-        # print(abas)
-        for aba in abas:
+def check_parts2(supernets, hypernets, line):
+    print(line)
+    for part in supernets:
+        for aba in abas(part):
+            # print("aba:", aba)
             bab = aba[1] + aba[0] + aba[1]
-            if line.find(bab) != -1:
-                print(line,aba,bab)
-                return True
+            for h in hypernets:
+                if h.find(bab) != -1:
+                    # print("Match", h, aba, bab)
+                    return True
     return False
 
 
 def solve2(lines):
-    sum = 0
+    suma = 0
     for line in lines:
         line = line.strip()
         parts = [w.split('[') for w in line.split(']')]
-        if check_parts2(parts, line):
+        supernets = [p[0] for p in parts]
+        hypernets = [p[1] for p in parts if len(p) > 1]
+        if check_parts2(supernets, hypernets, line):
+            suma += 1
 
-            sum += 1
-        # break
-    print(sum)
+    print(suma)
+
 
 # INPUT = "aoc_day7_test.txt"
 INPUT = "aoc_day7_input.txt"
 
 if __name__ == "__main__":
     with open(INPUT) as f:
-       l = f.readlines()
+        l = f.readlines()
     solve2(l)
