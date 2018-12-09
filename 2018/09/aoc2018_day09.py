@@ -1,7 +1,8 @@
 # https://adventofcode.com/2018/day/9
 
 from __future__ import print_function
-from collections import defaultdict
+from collections import defaultdict, deque
+from time import time
 
 INPUT = "aoc2018_day09.txt"
 
@@ -34,6 +35,7 @@ class Game:
         for _ in range(7):
             removed = removed.prev
         removed.prev.next = removed.next
+        removed.next.prev = removed.prev
         self.cur_node = removed.next
         return removed.data
 
@@ -62,6 +64,21 @@ def play2(players, last_marble):
     return max(score.values())
 
 
+def play3(players, last_marble):
+    print(players, last_marble)
+    desk = deque([0])
+    score = defaultdict(int)
+    for marble in range(1, last_marble+1):
+        if not marble % 23:
+            desk.rotate(7)
+            score[marble % players] += marble + desk.pop()
+            desk.rotate(-1)
+        else:
+            desk.rotate(-1)
+            desk.append(marble)
+
+    return max(score.values())
+
 # test data
 # 10 players; last marble is worth 1618 points: high score is 8317
 # 13 players; last marble is worth 7999 points: high score is 146373
@@ -77,4 +94,11 @@ with open(INPUT) as f:
     assert(play2(13,7999) == 146373)
     assert(play2(30,5807) == 37305)
     print(play2(int(data[0]), int(data[6])))
+    start = time()
     print(play2(int(data[0]), int(data[6]) * 100))
+    end = time()
+    print("my version", end - start)
+    start = time()
+    print(play3(int(data[0]), int(data[6]) * 100))
+    end = time()
+    print("deque", end - start)
