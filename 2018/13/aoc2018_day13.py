@@ -65,14 +65,14 @@ def move_carts(track, cart_positions, part):
 
     carts = sorted(cart_positions.keys())
     for y, x in carts:
-        if (y,x) not in new_positions:
+        if (y, x) not in new_positions:
             # cart was already removed in crash
             continue
         orient, turn = cart_positions[(y, x)]
         dx, dy = next_position[orient]
         newx, newy = x + dx, y + dy
         # cart will move so remove it at current position
-        del new_positions[(y,x)]
+        del new_positions[(y, x)]
         if (newy, newx) in new_positions:
             print("Collision at %d,%d" % (newx, newy))
             # part 1
@@ -94,7 +94,7 @@ def move_carts(track, cart_positions, part):
 
 def process(track):
     init_cart_positions = init_carts(track)
-    for part in range(1,3):
+    for part in range(1, 3):
         print("# Part", part)
         cart_positions = init_cart_positions
         collided = False
