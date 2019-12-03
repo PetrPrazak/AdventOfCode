@@ -17,24 +17,19 @@ def cityblock_distance(p, q=(0, 0)):
     return abs(X(p) - X(q)) + abs(Y(p) - Y(q))
 
 
+# map of offset based on direction
+OFF = dict(zip("UDLR", [(0, 1), (0, -1), (-1, 0), (1, 0)]))
+
+
 # returns the list of wire positions so we can find the length of wire to each point
 def compute_points(wire):
     path = list()
     pos = 0, 0
     for step in wire.split(","):
-        direction = step[0]
-        stride = int(step[1:])
+        direction, stride = step[0], int(step[1:])
         for _ in range(stride):
-            if direction == "R":
-                pos = X(pos) + 1, Y(pos)
-            elif direction == "L":
-                pos = X(pos) - 1, Y(pos)
-            elif direction == "U":
-                pos = X(pos), Y(pos) + 1
-            elif direction == "D":
-                pos = X(pos), Y(pos) - 1
-            else:
-                assert False, "Wrong direction %r" % direction
+            dx, dy = OFF[direction]
+            pos = X(pos) + dx, Y(pos) + dy
             path.append(pos)
     return path
 
