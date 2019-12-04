@@ -44,11 +44,14 @@ def test2():
 
 def main():
     # part 1
-    l = [num for num in range(246540, 787419) if filter_password1(num)]
-    print(len(l))  # 1063
-    # part 2
-    l = [num for num in range(246540, 787419) if filter_password2(num)]
-    print(len(l))  # 686
+    count1 = count2 = 0
+    for num in range(246540, 787419):
+        if filter_password1(num):
+            count1 += 1
+        if filter_password2(num):
+            count2 += 1
+    print(count1)  # 1063
+    print(count2)  # 686
 
 
 if __name__ == "__main__":
