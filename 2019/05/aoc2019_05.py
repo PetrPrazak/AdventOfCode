@@ -4,6 +4,7 @@ from __future__ import print_function
 
 INPUT = "aoc2019_05_input.txt"
 TRACE = 1
+TRACE_MEM = 1
 
 # np - number of parameters
 INSTRUCTIONS = \
@@ -66,15 +67,21 @@ def intcode_processor(mem, input_data):
             op1, op2 = load_data(mem, op_data[0]), load_data(mem, op_data[1])
             res = get_addr(op_data[2])
             mem[res] = op1 + op2
+            if TRACE_MEM:
+                print(">%r + %r = %r" % (op1, op2, mem[res]))
 
         elif op == 2:  # MUL
             op1, op2 = load_data(mem, op_data[0]), load_data(mem, op_data[1])
             res = get_addr(op_data[2])
             mem[res] = op1 * op2
+            if TRACE_MEM:
+                print(">%r * %r = %r" % (op1, op2, mem[res]))
 
         elif op == 3:  # STORE INPUT
             res = get_addr(op_data[0])
             mem[res] = input_data
+            if TRACE_MEM:
+                print(">%r" % mem[res])
 
         elif op == 4:  # OUTPUT
             val = load_data(mem, op_data[0])
@@ -82,23 +89,35 @@ def intcode_processor(mem, input_data):
 
         elif op == 5:  # JNZ
             op1, op2 = load_data(mem, op_data[0]), load_data(mem, op_data[1])
+            if TRACE_MEM:
+                print(">%r != 0" % op1)
             if op1:
+                if TRACE_MEM:
+                    print(">JUMP")
                 next_pc = op2
 
         elif op == 6:  # JZ
             op1, op2 = load_data(mem, op_data[0]), load_data(mem, op_data[1])
+            if TRACE_MEM:
+                print(">%r == 0" % op1)
             if not op1:
+                if TRACE_MEM:
+                    print(">JUMP")
                 next_pc = op2
 
         elif op == 7:  # LESS
             op1, op2 = load_data(mem, op_data[0]), load_data(mem, op_data[1])
             res = get_addr(op_data[2])
             mem[res] = 1 if op1 < op2 else 0
+            if TRACE_MEM:
+                print(">%r < %r = %r" %(op1, op2, mem[res]))
 
         elif op == 8:  # EQUAL
             op1, op2 = load_data(mem, op_data[0]), load_data(mem, op_data[1])
             res = get_addr(op_data[2])
             mem[res] = 1 if op1 == op2 else 0
+            if TRACE_MEM:
+                print(">%r == %r = %r" % (op1, op2, mem[res]))
 
         elif op == 99:  # HLT
             break
