@@ -3,28 +3,50 @@
 from __future__ import print_function
 
 INPUT = "aoc2019_05_input.txt"
+TRACE = 1
 
-# dict - key is op_code, item is number of parameters
-INSTRUCTIONS = dict(zip([1, 2, 3, 4, 5, 6, 7, 8, 99],
-                        [3, 3, 1, 1, 2, 2, 3, 3, 0]))
+# np - number of parameters
+INSTRUCTIONS = \
+    {1: {"np": 3, "name": "ADD"},
+     2: {"np": 3, "name": "MUL"},
+     3: {"np": 1, "name": "INP"},
+     4: {"np": 1, "name": "OUT"},
+     5: {"np": 2, "name": "JNZ"},
+     6: {"np": 2, "name": "JZE"},
+     7: {"np": 3, "name": "IFL"},
+     8: {"np": 3, "name": "IFE"},
+     99: {"np": 0, "name": "HLT"},
+     }
 
 
 def intcode_processor(mem, input_data):
+
+    def print_code(op, addr_mode, op_mem):
+        params = INSTRUCTIONS[op]["np"]
+        print(INSTRUCTIONS[op]["name"], end=" ")
+        for p in range(params):
+            if addr_mode[p]:
+                print("#", end="")
+            end = "\n" if p == params - 1 else ", "
+            print(op_mem[p], end=end)
+
     def fetch_instruction(mem, pc):
         opcode = mem[pc]
         addr_mode = [(opcode // 100) % 10, (opcode // 1000) % 10, (opcode // 10000) % 10]
         op = opcode % 100
         try:
-            params = INSTRUCTIONS[op]
+            params = INSTRUCTIONS[op]["np"]
         except KeyError:
             print("Unknown opcode %r at %r" % (op, pc))
             raise
 
+        if TRACE:
+            print("%03d" % pc, end=": ")
+            print_code(op, addr_mode, mem[pc + 1:pc + params + 1])
+
         op_data = list(range(params))
         for p in range(params):
             op_data[p] = mem[pc + p + 1], addr_mode[p]
-
-        # print(pc, ":", op, op_data)
         return op, op_data
 
     def load_data(mem, op_data):
@@ -39,14 +61,16 @@ def intcode_processor(mem, input_data):
     next_pc = 0
     while True:
         op, op_data = fetch_instruction(mem, pc)
-        next_pc = pc + INSTRUCTIONS[op] + 1
+        next_pc = pc + INSTRUCTIONS[op]["np"] + 1
         if op == 1:  # ADD
-            op1, op2, res = op_data[0], op_data[1], get_addr(op_data[2])
-            mem[res] = load_data(mem, op1) + load_data(mem, op2)
+            op1, op2 = load_data(mem, op_data[0]), load_data(mem, op_data[1])
+            res = get_addr(op_data[2])
+            mem[res] = op1 + op2
 
         elif op == 2:  # MUL
-            op1, op2, res = op_data[0], op_data[1], get_addr(op_data[2])
-            mem[res] = load_data(mem, op1) * load_data(mem, op2)
+            op1, op2 = load_data(mem, op_data[0]), load_data(mem, op_data[1])
+            res = get_addr(op_data[2])
+            mem[res] = op1 * op2
 
         elif op == 3:  # STORE INPUT
             res = get_addr(op_data[0])
@@ -67,11 +91,13 @@ def intcode_processor(mem, input_data):
                 next_pc = op2
 
         elif op == 7:  # LESS
-            op1, op2, res = load_data(mem, op_data[0]), load_data(mem, op_data[1]), get_addr(op_data[2])
+            op1, op2 = load_data(mem, op_data[0]), load_data(mem, op_data[1])
+            res = get_addr(op_data[2])
             mem[res] = 1 if op1 < op2 else 0
 
         elif op == 8:  # EQUAL
-            op1, op2, res = load_data(mem, op_data[0]), load_data(mem, op_data[1]), get_addr(op_data[2])
+            op1, op2 = load_data(mem, op_data[0]), load_data(mem, op_data[1])
+            res = get_addr(op_data[2])
             mem[res] = 1 if op1 == op2 else 0
 
         elif op == 99:  # HLT
@@ -96,15 +122,16 @@ def test():
 
 
 def test2():
-    process_data("3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,1106,0,36,98,0,0,1002,21,125,20,4,20,1105,1,46,"
+    process_data("3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,"
+                 "1106,0,36,98,0,0,1002,21,125,20,4,20,1105,1,46,"
                  "104,999,1105,1,46,1101,1000,1,20,4,20,1105,1,46,98,99", 50)
 
 
 def main():
     with open(INPUT) as f:
         data = f.readline()
-        process_data(data, 1)
-        process_data(data, 5)
+        # process_data(data, 1) # OUT: 15314507
+        process_data(data, 5) # OUT: 652726
 
 
 if __name__ == "__main__":
