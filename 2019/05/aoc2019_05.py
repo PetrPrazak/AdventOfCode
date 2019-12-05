@@ -1,0 +1,113 @@
+# https://adventofcode.com/2019/day/05
+
+from __future__ import print_function
+
+INPUT = "aoc2019_05_input.txt"
+
+# dict - key is op_code, item is number of parameters
+INSTRUCTIONS = dict(zip([1, 2, 3, 4, 5, 6, 7, 8, 99],
+                        [3, 3, 1, 1, 2, 2, 3, 3, 0]))
+
+
+def intcode_processor(mem, input_data):
+    def fetch_instruction(mem, pc):
+        opcode = mem[pc]
+        addr_mode = [(opcode // 100) % 10, (opcode // 1000) % 10, (opcode // 10000) % 10]
+        op = opcode % 100
+        try:
+            params = INSTRUCTIONS[op]
+        except KeyError:
+            print("Unknown opcode %r at %r" % (op, pc))
+            raise
+
+        op_data = list(range(params))
+        for p in range(params):
+            op_data[p] = mem[pc + p + 1], addr_mode[p]
+
+        # print(pc, ":", op, op_data)
+        return op, op_data
+
+    def load_data(mem, op_data):
+        param, addr_mode = op_data
+        return mem[param] if addr_mode is 0 else param
+
+    def get_addr(op_data):
+        param, _ = op_data
+        return param
+
+    pc = 0
+    next_pc = 0
+    while True:
+        op, op_data = fetch_instruction(mem, pc)
+        next_pc = pc + INSTRUCTIONS[op] + 1
+        if op == 1:  # ADD
+            op1, op2, res = op_data[0], op_data[1], get_addr(op_data[2])
+            mem[res] = load_data(mem, op1) + load_data(mem, op2)
+
+        elif op == 2:  # MUL
+            op1, op2, res = op_data[0], op_data[1], get_addr(op_data[2])
+            mem[res] = load_data(mem, op1) * load_data(mem, op2)
+
+        elif op == 3:  # STORE INPUT
+            res = get_addr(op_data[0])
+            mem[res] = input_data
+
+        elif op == 4:  # OUTPUT
+            val = load_data(mem, op_data[0])
+            print("OUT:", val)
+
+        elif op == 5:  # JNZ
+            op1, op2 = load_data(mem, op_data[0]), load_data(mem, op_data[1])
+            if op1:
+                next_pc = op2
+
+        elif op == 6:  # JZ
+            op1, op2 = load_data(mem, op_data[0]), load_data(mem, op_data[1])
+            if not op1:
+                next_pc = op2
+
+        elif op == 7:  # LESS
+            op1, op2, res = load_data(mem, op_data[0]), load_data(mem, op_data[1]), get_addr(op_data[2])
+            mem[res] = 1 if op1 < op2 else 0
+
+        elif op == 8:  # EQUAL
+            op1, op2, res = load_data(mem, op_data[0]), load_data(mem, op_data[1]), get_addr(op_data[2])
+            mem[res] = 1 if op1 == op2 else 0
+
+        elif op == 99:  # HLT
+            break
+
+        pc = next_pc
+
+    return mem[0]
+
+
+def process_data(data, inp):
+    # print(data)
+    mem = list(map(int, data.split(',')))
+    return intcode_processor(mem, inp)
+
+
+def test():
+    process_data("3,0,4,0,99", 88)
+    process_data("1002,4,3,4,33", 0)
+    process_data("3,9,8,9,10,9,4,9,99,-1,8", 8)
+    process_data("3,9,8,9,10,9,4,9,99,-1,8", 0)
+
+
+def test2():
+    process_data("3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,1106,0,36,98,0,0,1002,21,125,20,4,20,1105,1,46,"
+                 "104,999,1105,1,46,1101,1000,1,20,4,20,1105,1,46,98,99", 50)
+
+
+def main():
+    with open(INPUT) as f:
+        data = f.readline()
+        process_data(data, 1)
+        process_data(data, 5)
+
+
+if __name__ == "__main__":
+    # test()
+    # test2()
+    main()
