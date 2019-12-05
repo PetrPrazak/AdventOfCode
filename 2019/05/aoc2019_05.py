@@ -5,6 +5,7 @@ from __future__ import print_function
 INPUT = "aoc2019_05_input.txt"
 TRACE = 1
 TRACE_MEM = 1
+DUMP_MEM = 1
 
 # np - number of parameters
 INSTRUCTIONS = \
@@ -60,6 +61,8 @@ def intcode_processor(mem, input_data):
 
     pc = 0
     next_pc = 0
+    out_mem = dict()
+
     while True:
         op, op_data = fetch_instruction(mem, pc)
         next_pc = pc + INSTRUCTIONS[op]["np"] + 1
@@ -69,6 +72,9 @@ def intcode_processor(mem, input_data):
             mem[res] = op1 + op2
             if TRACE_MEM:
                 print(">%r + %r = %r" % (op1, op2, mem[res]))
+            if DUMP_MEM:
+                out_mem[res] = mem[res]
+                print(out_mem)
 
         elif op == 2:  # MUL
             op1, op2 = load_data(mem, op_data[0]), load_data(mem, op_data[1])
@@ -76,12 +82,18 @@ def intcode_processor(mem, input_data):
             mem[res] = op1 * op2
             if TRACE_MEM:
                 print(">%r * %r = %r" % (op1, op2, mem[res]))
+            if DUMP_MEM:
+                out_mem[res] = mem[res]
+                print(out_mem)
 
         elif op == 3:  # STORE INPUT
             res = get_addr(op_data[0])
             mem[res] = input_data
             if TRACE_MEM:
                 print(">%r" % mem[res])
+            if DUMP_MEM:
+                out_mem[res] = mem[res]
+                print(out_mem)
 
         elif op == 4:  # OUTPUT
             val = load_data(mem, op_data[0])
@@ -111,6 +123,9 @@ def intcode_processor(mem, input_data):
             mem[res] = 1 if op1 < op2 else 0
             if TRACE_MEM:
                 print(">%r < %r = %r" %(op1, op2, mem[res]))
+            if DUMP_MEM:
+                out_mem[res] = mem[res]
+                print(out_mem)
 
         elif op == 8:  # EQUAL
             op1, op2 = load_data(mem, op_data[0]), load_data(mem, op_data[1])
@@ -118,6 +133,9 @@ def intcode_processor(mem, input_data):
             mem[res] = 1 if op1 == op2 else 0
             if TRACE_MEM:
                 print(">%r == %r = %r" % (op1, op2, mem[res]))
+            if DUMP_MEM:
+                out_mem[res] = mem[res]
+                print(out_mem)
 
         elif op == 99:  # HLT
             break
