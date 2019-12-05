@@ -5,8 +5,8 @@ from collections import Counter
 
 
 def filter_password1(num):
-    digits = [int(d) for d in str(num)]
-    prev = 0
+    digits = str(num)
+    prev = '0'
     for d in digits:
         if d < prev:
             return False
@@ -15,8 +15,8 @@ def filter_password1(num):
 
 
 def filter_password2(num):
-    digits = [int(d) for d in str(num)]
-    prev = 0
+    digits = str(num)
+    prev = '0'
     for d in digits:
         if d < prev:
             return False
@@ -31,15 +31,15 @@ def filter_password2(num):
 
 
 def test1():
-    assert filter_password1(111111) is True
-    assert filter_password1(223450) is False
-    assert filter_password1(123789) is False
+    assert filter_password1(111111)
+    assert not filter_password1(223450)
+    assert not filter_password1(123789)
 
 
 def test2():
-    assert filter_password2(112233) is True
-    assert filter_password2(123444) is False
-    assert filter_password2(111122) is True
+    assert filter_password2(112233)
+    assert not filter_password2(123444)
+    assert filter_password2(111122)
 
 
 def main():
