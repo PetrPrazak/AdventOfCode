@@ -24,13 +24,16 @@ INSTRUCTIONS = \
 def intcode_processor(mem, input_data):
 
     def print_code(op, addr_mode, op_mem):
-        params = INSTRUCTIONS[op]["np"]
-        print(INSTRUCTIONS[op]["name"], end=" ")
+        instr = INSTRUCTIONS[op]
+        params = instr["np"]
+        print(instr["name"], end=" ")
         for p in range(params):
             if addr_mode[p]:
-                print("#", end="")
+                print("%d" % op_mem[p], end="")
+            else:
+                print("[%d]" % op_mem[p], end="")
             end = "\n" if p == params - 1 else ", "
-            print(op_mem[p], end=end)
+            print("", end=end)
 
     def fetch_instruction(mem, pc):
         opcode = mem[pc]
@@ -49,7 +52,7 @@ def intcode_processor(mem, input_data):
         op_data = list(range(params))
         for p in range(params):
             op_data[p] = mem[pc + p + 1], addr_mode[p]
-        return op, op_data
+        return op, params, op_data
 
     def load_data(mem, op_data):
         param, addr_mode = op_data
@@ -60,12 +63,12 @@ def intcode_processor(mem, input_data):
         return param
 
     pc = 0
-    next_pc = 0
     out_mem = dict()
 
     while True:
-        op, op_data = fetch_instruction(mem, pc)
-        next_pc = pc + INSTRUCTIONS[op]["np"] + 1
+        op, params, op_data = fetch_instruction(mem, pc)
+        next_pc = pc + 1 + params
+
         if op == 1:  # ADD
             op1, op2 = load_data(mem, op_data[0]), load_data(mem, op_data[1])
             res = get_addr(op_data[2])
@@ -86,7 +89,7 @@ def intcode_processor(mem, input_data):
                 out_mem[res] = mem[res]
                 print(out_mem)
 
-        elif op == 3:  # STORE INPUT
+        elif op == 3:  # INP
             res = get_addr(op_data[0])
             mem[res] = input_data
             if TRACE_MEM:
@@ -95,7 +98,7 @@ def intcode_processor(mem, input_data):
                 out_mem[res] = mem[res]
                 print(out_mem)
 
-        elif op == 4:  # OUTPUT
+        elif op == 4:  # OUT
             val = load_data(mem, op_data[0])
             print("OUT:", val)
 
@@ -108,7 +111,7 @@ def intcode_processor(mem, input_data):
                     print(">JUMP")
                 next_pc = op2
 
-        elif op == 6:  # JZ
+        elif op == 6:  # JZE
             op1, op2 = load_data(mem, op_data[0]), load_data(mem, op_data[1])
             if TRACE_MEM:
                 print(">%r == 0" % op1)
@@ -117,7 +120,7 @@ def intcode_processor(mem, input_data):
                     print(">JUMP")
                 next_pc = op2
 
-        elif op == 7:  # LESS
+        elif op == 7:  # IFL
             op1, op2 = load_data(mem, op_data[0]), load_data(mem, op_data[1])
             res = get_addr(op_data[2])
             mem[res] = 1 if op1 < op2 else 0
@@ -127,7 +130,7 @@ def intcode_processor(mem, input_data):
                 out_mem[res] = mem[res]
                 print(out_mem)
 
-        elif op == 8:  # EQUAL
+        elif op == 8:  # IFE
             op1, op2 = load_data(mem, op_data[0]), load_data(mem, op_data[1])
             res = get_addr(op_data[2])
             mem[res] = 1 if op1 == op2 else 0
