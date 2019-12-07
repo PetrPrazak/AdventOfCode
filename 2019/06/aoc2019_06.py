@@ -36,7 +36,6 @@ def process(data):
             break
 
     print(you.index(p) + san.index(p))
-    pass
 
 
 def main():
