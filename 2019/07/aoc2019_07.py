@@ -1,9 +1,10 @@
-# https://adventofcode.com/2018/day/06
+# https://adventofcode.com/2019/day/07
 
 from __future__ import print_function
 from itertools import permutations
 
 INPUT = "aoc2019_07_input.txt"
+
 
 TRACE = 0
 TRACE_MEM = 0
@@ -23,7 +24,7 @@ INSTRUCTIONS = \
      }
 
 
-def intcode_processor(mem, proc_id, input_data):
+def intcode_processor(mem, proc_id):
     def print_code(op, addr_mode, op_mem):
         instr = INSTRUCTIONS[op]
         params = instr["np"]
@@ -66,8 +67,7 @@ def intcode_processor(mem, proc_id, input_data):
 
     pc = 0
     out_mem = dict()
-    input_pos = None
-    # print("==START==", proc_id, input_data)
+    # print("==START==", proc_id)
     while True:
         op, params, op_data = fetch_instruction(mem, pc)
         next_pc = pc + 1 + params
@@ -94,8 +94,7 @@ def intcode_processor(mem, proc_id, input_data):
 
         elif op == 3:  # INP
             res = get_addr(op_data[0])
-            mem[res] = input_data[input_pos] if input_pos is not None else proc_id
-            input_pos = 0  # first input is proc_id, all other inputs come from input_data
+            mem[res] = yield
             # print("INPUT[%d]" % proc_id, res, mem[res])
             if TRACE_MEM:
                 print("<%r> %r" % (proc_id, mem[res]))
@@ -156,32 +155,39 @@ def intcode_processor(mem, proc_id, input_data):
 
 def sigle_run(mem, perm):
     last_out = 0
+    amps = []
     for amp in list(perm):
-        runmem = mem[:]
-        last_out = next(intcode_processor(runmem, amp, [last_out]))
+        proc = intcode_processor(mem[:], amp)
+        next(proc)  # for input
+        proc.send(amp)
+        amps.append(proc)
+    for proc in amps:
+        last_out = proc.send(last_out)
     return last_out
 
 
 def part1(data):
     mem = list(map(int, data.split(',')))
-    outs = [(sigle_run(mem, p), p) for p in permutations([0, 1, 2, 3, 4])]
+    outs = [(sigle_run(mem, p), p) for p in permutations(range(0, 5))]
     print(max(outs))
 
 
 def loop_run(mem, perm):
     amp_list = list(perm)
-    context = dict()
-    input_data = dict()
+    context = []
     for amp in amp_list:
-        inp = input_data[amp] = [0]
-        context[amp] = intcode_processor(mem[:], amp, inp)
+        proc = intcode_processor(mem[:], amp)
+        next(proc)
+        proc.send(amp)
+        context.append(proc)
 
     last_out = 0
     while True:
+        for amp in context:
+            last_out = amp.send(last_out)
         try:
-            for amp in amp_list:
-                input_data[amp][0] = last_out
-                last_out = next(context[amp])
+            for amp in context:
+                next(amp)
         except StopIteration:
             break
 
@@ -190,7 +196,7 @@ def loop_run(mem, perm):
 
 def part2(data):
     mem = list(map(int, data.split(',')))
-    outs = [(loop_run(mem, p), p) for p in permutations([5, 6, 7, 8, 9])]
+    outs = [(loop_run(mem, p), p) for p in permutations(range(5, 10))]
     print(max(outs))
 
 
