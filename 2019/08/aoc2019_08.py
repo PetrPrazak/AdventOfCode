@@ -8,12 +8,13 @@ INPUT = "aoc2019_08_input.txt"
 cat = ''.join
 
 
-def get_layer(data, pos, width, height):
-    return data[pos: pos + width * height]
+def get_layer(data, layer, area):
+    pos = layer * area
+    return data[pos: pos + area]
 
 
 def print_image(image, width, height):
-    output = ['#' if p is 1 else ' ' for p in image]
+    output = ['*' if p is 1 else ' ' for p in image]
     for h in range(height):
         print(cat(output[h * width: (h + 1) * width]))
 
@@ -30,7 +31,7 @@ def process(data, size):
     image = [2] * area
 
     for i in range(layers_count):
-        layer = get_layer(data, i * area, width, height)
+        layer = get_layer(data, i, area)
         d = Counter(layer)
         if d[0] < min0:
             min0 = d[0]
@@ -39,9 +40,16 @@ def process(data, size):
         image = [bit if img == 2 else img for bit, img in zip(layer, image)]
 
     # part 1
-    print(product12)
+    print(product12)  # 2193
+
     # part 2
     print_image(image, width, height)
+    # *   ***** *  * **** ****
+    # *   **    *  * *    *
+    #  * * ***  **** ***  ***
+    #   *  *    *  * *    *
+    #   *  *    *  * *    *
+    #   *  **** *  * **** *
 
 
 def test():
