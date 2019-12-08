@@ -25,7 +25,7 @@ def process(data, size):
     area = width * height
 
     min0 = area
-    min0digits = None
+    product12 = None
     layers_count = len(data) // area
     image = [2] * area
 
@@ -34,14 +34,12 @@ def process(data, size):
         d = Counter(layer)
         if d[0] < min0:
             min0 = d[0]
-            min0digits = d
+            product12 = d[1] * d[2]
         # part 2
-        for (pos, bit) in enumerate(layer):
-            if image[pos] == 2:
-                image[pos] = bit
+        image = [bit if img == 2 else img for bit, img in zip(layer, image)]
 
     # part 1
-    print(min0digits[1] * min0digits[2])
+    print(product12)
     # part 2
     print_image(image, width, height)
 
