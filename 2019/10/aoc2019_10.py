@@ -2,11 +2,25 @@ from __future__ import print_function
 from collections import Counter, defaultdict
 from copy import deepcopy
 from math import gcd, asin, sqrt, pi
+import time
+from functools import wraps
 
 cat = ''.join
 
 INPUT = "aoc2019_10_input.txt"
 TEST = "test.txt"
+
+
+def timeit(method):
+    @wraps(method)
+    def timed(*args, **kw):
+        ts = time.time()
+        result = method(*args, **kw)
+        te = time.time()
+        print('%r %2.2f ms' % (method.__name__, (te - ts) * 1000))
+        return result
+
+    return timed
 
 
 def read_input_lines(filename):
@@ -153,16 +167,14 @@ def part2(data, pos):
                 del allangles[a]
                 continue
             pos = asteroids.pop(0)
-            # print(order, pos)
             if order == 200:
-                winner = (100 * pos[0] + pos[1])
+                winner = 100 * pos[0] + pos[1]
             order += 1
     return winner
 
 
 def test1():
-    data = read_input_lines(TEST)
-    grid = deepcopy(data)
+    grid = read_input_lines(TEST)
     width = len(grid[0])
     height = len(grid)
     print(count_position(grid, width, height, (11, 13)))
@@ -170,9 +182,12 @@ def test1():
 
 def test2():
     data = read_input_lines(TEST)
-    print(part2(data, (11, 13)))
+    max_ast, pos = count_positions(data)
+    print(max_ast)  # 210
+    print(part2(data, pos))  # 802
 
 
+@timeit
 def main():
     data = read_input_lines(INPUT)
     max_ast, pos = count_positions(data)
