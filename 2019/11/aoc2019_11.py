@@ -258,12 +258,14 @@ class Direction(Enum):
         return [(0, -1), (1, 0), (0, 1), (-1, 0)][self.value]
 
 
-def process(program, panels):
+def process(program, seed):
+    panels = defaultdict(int)
     proc = IntCode(program).run()
     next(proc)
 
     d = Direction.UP
     pos = (0, 0)
+    panels[pos] = seed
     while True:
         try:
             panels[pos] = proc.send(panels[pos])
@@ -276,14 +278,19 @@ def process(program, panels):
             pos = pos[0] + step[0], pos[1] + step[1]
         except StopIteration:
             break
+    return panels
+
+
+def minmax_tuples(tuple_list, element=0):
+    res = sorted(tuple_list, key=lambda k: k[element])
+    return res[0][element], res[-1][element]
 
 
 def print_panels(panels):
     coords = list(panels.keys())
-    min_x = min(coords)[0]
-    min_y = min(coords, key=lambda k: k[1])[1]
-    max_x = max(coords)[0]
-    max_y = max(coords, key=lambda k: k[1])[1]
+    min_x, max_x = minmax_tuples(coords, 0)
+    min_y, max_y = minmax_tuples(coords, 1)
+    print((min_x, min_y), (max_x, max_y))
     for line in range(min_y, max_y + 1):
         for col in range(min_x, max_x + 1):
             pos = col, line
@@ -295,13 +302,10 @@ def print_panels(panels):
 def main():
     program = read_input_ints_separated(INPUT)
     # part 1
-    panels = defaultdict(int)
-    process(program, panels)
+    panels = process(program, 0)
     print(len(panels.keys()))  # 2041
     # part 2
-    panels = defaultdict(int)
-    panels[(0, 0)] = 1
-    process(program, panels)
+    panels = process(program, 1)
     print_panels(panels)  # ZRZPKEZR
 
 
