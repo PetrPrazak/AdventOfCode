@@ -1,10 +1,11 @@
-# https://adventofcode.com/2019/day/11
+# https://adventofcode.com/2019/day/09
 
 from __future__ import print_function
 from collections import defaultdict
-from enum import IntEnum, Enum
+from enum import IntEnum
 
-INPUT = "aoc2019_11_input.txt"
+# public exports
+__all__ = ['IntCode', 'single_run']
 
 
 class OpCode(IntEnum):
@@ -20,22 +21,27 @@ class OpCode(IntEnum):
     HLT = 99
 
 
+# argument options
+ARG_READ = 0
+ARG_WRITE = 1
+
+
 class IntCode(object):
     TRACE = 0
     TRACE_MEM = 0
     DUMP_MEM = 0
 
     INSTRUCTIONS = {
-        OpCode.ADD: 3,
-        OpCode.MUL: 3,
-        OpCode.INP: 1,
-        OpCode.OUT: 1,
-        OpCode.JNZ: 2,
-        OpCode.JZE: 2,
-        OpCode.IFL: 3,
-        OpCode.IFE: 3,
-        OpCode.INB: 1,
-        OpCode.HLT: 0,
+        OpCode.ADD: (ARG_READ, ARG_READ, ARG_WRITE),
+        OpCode.MUL: (ARG_READ, ARG_READ, ARG_WRITE),
+        OpCode.INP: (ARG_WRITE,),
+        OpCode.OUT: (ARG_READ,),
+        OpCode.JNZ: (ARG_READ, ARG_READ),
+        OpCode.JZE: (ARG_READ, ARG_READ),
+        OpCode.IFL: (ARG_READ, ARG_READ, ARG_WRITE),
+        OpCode.IFE: (ARG_READ, ARG_READ, ARG_WRITE),
+        OpCode.INB: (ARG_READ,),
+        OpCode.HLT: (),
     }
 
     def __init__(self, program, proc_id=0):
@@ -49,7 +55,7 @@ class IntCode(object):
 
     @staticmethod
     def print_code(op, addr_mode, op_mem):
-        params = IntCode.INSTRUCTIONS[op]
+        params = len(IntCode.INSTRUCTIONS[op])
         print(op.name, end=" ")
         for p in range(params):
             if addr_mode[p] == 1:
@@ -72,15 +78,20 @@ class IntCode(object):
             raise
 
         params = IntCode.INSTRUCTIONS[op]
+        param_count = len(params)
         if IntCode.TRACE:
             print("<%r> %03d" % (self.proc_id, self.pc), end=": ")
-            op_params = [self.mem[a] for a in range(self.pc + 1, self.pc + params + 1)]
+            op_params = [self.mem[a] for a in range(self.pc + 1, self.pc + param_count + 1)]
             IntCode.print_code(op, addr_mode, op_params)
 
-        op_data = list(range(params))
-        for p in range(params):
-            op_data[p] = self.mem[self.pc + p + 1], addr_mode[p]
-        return op, params, op_data
+        op_data = [None] * param_count
+        for p in range(param_count):
+            arg = self.mem[self.pc + p + 1]
+            if params[p] == ARG_READ:
+                op_data[p] = self.load_data((arg, addr_mode[p]))
+            else:  # ARG_WRITE
+                op_data[p] = self.get_addr((arg, addr_mode[p]))
+        return op, op_data
 
     def load_data(self, op_data):
         param, addr_mode = op_data
@@ -119,13 +130,11 @@ class IntCode(object):
 
     def run(self):
         while True:
-            op, params, op_data = self.fetch_instruction()
-            next_pc = self.pc + 1 + params
+            op, op_data = self.fetch_instruction()
+            next_pc = self.pc + 1 + len(op_data)
 
             if op == OpCode.ADD:
-                op1 = self.load_data(op_data[0])
-                op2 = self.load_data(op_data[1])
-                res = self.get_addr(op_data[2])
+                op1, op2, res = op_data
                 self.mem[res] = op1 + op2
                 if IntCode.TRACE_MEM:
                     self._trace_mem("%r + %r = %r" % (op1, op2, self.mem[res]))
@@ -133,9 +142,7 @@ class IntCode(object):
                     self._dump_mem(res)
 
             elif op == OpCode.MUL:
-                op1 = self.load_data(op_data[0])
-                op2 = self.load_data(op_data[1])
-                res = self.get_addr(op_data[2])
+                op1, op2, res = op_data
                 self.mem[res] = op1 * op2
                 if IntCode.TRACE_MEM:
                     self._trace_mem("%r * %r = %r" % (op1, op2, self.mem[res]))
@@ -143,7 +150,7 @@ class IntCode(object):
                     self._dump_mem(res)
 
             elif op == OpCode.INP:
-                res = self.get_addr(op_data[0])
+                res = op_data[0]
                 val = self.next_input if self.next_input is not None else (yield)
                 if val is None:
                     raise ValueError("wrong input value")
@@ -154,14 +161,13 @@ class IntCode(object):
                     self._dump_mem(res)
 
             elif op == OpCode.OUT:
-                val = self.load_data(op_data[0])
+                val = op_data[0]
                 if IntCode.TRACE_MEM:
                     self._trace_mem("OUT: %r" % val)
                 self.next_input = yield val
 
             elif op == OpCode.JNZ:
-                op1 = self.load_data(op_data[0])
-                op2 = self.load_data(op_data[1])
+                op1, op2 = op_data
                 if IntCode.TRACE_MEM:
                     self._trace_mem("%r != 0" % op1)
                 if op1:
@@ -170,8 +176,7 @@ class IntCode(object):
                         self._trace_mem("JUMP")
 
             elif op == OpCode.JZE:
-                op1 = self.load_data(op_data[0])
-                op2 = self.load_data(op_data[1])
+                op1, op2 = op_data
                 if IntCode.TRACE_MEM:
                     self._trace_mem("%r == 0" % op1)
                 if not op1:
@@ -180,9 +185,7 @@ class IntCode(object):
                         self._trace_mem("JUMP")
 
             elif op == OpCode.IFL:
-                op1 = self.load_data(op_data[0])
-                op2 = self.load_data(op_data[1])
-                res = self.get_addr(op_data[2])
+                op1, op2, res = op_data
                 self.mem[res] = 1 if op1 < op2 else 0
                 if IntCode.TRACE_MEM:
                     self._trace_mem("%r < %r = %r" % (op1, op2, self.mem[res]))
@@ -190,9 +193,7 @@ class IntCode(object):
                     self._dump_mem(res)
 
             elif op == OpCode.IFE:
-                op1 = self.load_data(op_data[0])
-                op2 = self.load_data(op_data[1])
-                res = self.get_addr(op_data[2])
+                op1, op2, res = op_data
                 self.mem[res] = 1 if op1 == op2 else 0
                 if IntCode.TRACE_MEM:
                     self._trace_mem("%r == %r = %r" % (op1, op2, self.mem[res]))
@@ -200,7 +201,7 @@ class IntCode(object):
                     self._dump_mem(res)
 
             elif op == OpCode.INB:
-                val = self.load_data(op_data[0])
+                val = op_data[0]
                 self.base += val
                 if IntCode.TRACE_MEM:
                     self._trace_mem("BASE = %r" % self.base)
@@ -211,103 +212,22 @@ class IntCode(object):
             self.pc = next_pc
 
 
-def single_run(program, single_input):
+def single_run(program, single_input=None):
     proc = IntCode(program).run()
-    next(proc)
-    out = proc.send(single_input)
-    output = [out]
-    for out in proc:
-        output.append(out)
-    return out
-
-
-###################################################################
-
-
-def read_input_line(filename):
-    with open(filename) as f:
-        data = f.readline().rstrip()
-        return data
-
-
-def read_input_ints(filename):
-    ints = list(map(int, read_input_line(filename)))
-    return ints
-
-
-def read_input_ints_separated(filename, sep=','):
-    ints = list(map(int, read_input_line(filename).split(sep)))
-    return ints
-
-
-###################################################################
-
-class Direction(Enum):
-    UP = 0
-    RIGHT = 1
-    DOWN = 2
-    LEFT = 3
-
-    def turn_left(self):
-        return Direction((self.value + 3) % 4)
-
-    def turn_right(self):
-        return Direction((self.value + 1) % 4)
-
-    def step(self):
-        return [(0, -1), (1, 0), (0, 1), (-1, 0)][self.value]
-
-
-def process(program, seed):
-    panels = defaultdict(int)
-    proc = IntCode(program).run()
-    next(proc)
-
-    d = Direction.UP
-    pos = (0, 0)
-    panels[pos] = seed
-    while True:
-        try:
-            panels[pos] = proc.send(panels[pos])
-            new_dir = next(proc)
-            if new_dir == 0:
-                d = d.turn_left()
-            else:
-                d = d.turn_right()
-            step = d.step()
-            pos = pos[0] + step[0], pos[1] + step[1]
-        except StopIteration:
-            break
-    return panels
-
-
-def minmax_tuples(tuple_list, element=0):
-    res = sorted(tuple_list, key=lambda k: k[element])
-    return res[0][element], res[-1][element]
-
-
-def print_panels(panels):
-    coords = list(panels.keys())
-    min_x, max_x = minmax_tuples(coords, 0)
-    min_y, max_y = minmax_tuples(coords, 1)
-    print((min_x, min_y), (max_x, max_y))
-    for line in range(min_y, max_y + 1):
-        for col in range(min_x, max_x + 1):
-            pos = col, line
-            pixel = '#' if pos in panels and panels[pos] == 1 else ' '
-            print(pixel, sep="", end="")
-        print("")
-
-
-def main():
-    program = read_input_ints_separated(INPUT)
-    # part 1
-    panels = process(program, 0)
-    print(len(panels.keys()))  # 2041
-    # part 2
-    panels = process(program, 1)
-    print_panels(panels)  # ZRZPKEZR
+    output = list()
+    if single_input is not None:
+        next(proc)
+        output.append(proc.send(single_input))
+    output.extend([out for out in proc])
+    return output
 
 
 if __name__ == "__main__":
-    main()
+    IntCode.TRACE = 0
+    IntCode.TRACE_MEM = 0
+    IntCode.DUMP_MEM = 0
+    prog1 = [109, 1, 204, -1, 1001, 100, 1, 100, 1008, 100, 16, 101, 1006, 101, 0, 99]
+    out1 = single_run(prog1)
+    print(prog1)
+    print(out1)
+    assert prog1 == out1
