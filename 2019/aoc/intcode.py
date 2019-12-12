@@ -54,19 +54,20 @@ class IntCode(object):
         self.next_input = None
 
     @staticmethod
-    def print_code(op, addr_mode, op_mem):
+    def print_code(op, addr_mode, op_mem, data):
         params = len(IntCode.INSTRUCTIONS[op])
-        print(op.name, end=" ")
+        line =str(op.name)
         for p in range(params):
             if addr_mode[p] == 1:
-                print("%d" % op_mem[p], end="")
+                format_str = " %d"
             elif addr_mode[p] == 2:
-                print("+(%d)" % op_mem[p], end="")
+                format_str = " +(%d)"
             else:
-                print("[%d]" % op_mem[p], end="")
+                format_str = " [%d]"
+            line += format_str % op_mem[p]
             if p < params - 1:
-                print(", ", end="")
-        print("")
+                line += ","
+        print("%-30s; %r" % (line, data))
 
     def fetch_instruction(self):
         opcode = self.mem[self.pc]
@@ -79,11 +80,6 @@ class IntCode(object):
 
         params = IntCode.INSTRUCTIONS[op]
         param_count = len(params)
-        if IntCode.TRACE:
-            print("<%r> %03d" % (self.proc_id, self.pc), end=": ")
-            op_params = [self.mem[a] for a in range(self.pc + 1, self.pc + param_count + 1)]
-            IntCode.print_code(op, addr_mode, op_params)
-
         op_data = [None] * param_count
         for p in range(param_count):
             arg = self.mem[self.pc + p + 1]
@@ -91,6 +87,12 @@ class IntCode(object):
                 op_data[p] = self.load_data((arg, addr_mode[p]))
             else:  # ARG_WRITE
                 op_data[p] = self.get_addr((arg, addr_mode[p]))
+
+        if IntCode.TRACE:
+            print("<%r> %03d" % (self.proc_id, self.pc), end=": ")
+            op_params = [self.mem[a] for a in range(self.pc + 1, self.pc + param_count + 1)]
+            IntCode.print_code(op, addr_mode, op_params, op_data)
+
         return op, op_data
 
     def load_data(self, op_data):
@@ -152,6 +154,7 @@ class IntCode(object):
             elif op == OpCode.INP:
                 res = op_data[0]
                 val = self.next_input if self.next_input is not None else (yield)
+                self.next_input = None
                 if val is None:
                     raise ValueError("wrong input value")
                 self.mem[res] = val
@@ -223,7 +226,7 @@ def single_run(program, single_input=None):
 
 
 if __name__ == "__main__":
-    IntCode.TRACE = 0
+    IntCode.TRACE = 1
     IntCode.TRACE_MEM = 0
     IntCode.DUMP_MEM = 0
     prog1 = [109, 1, 204, -1, 1001, 100, 1, 100, 1008, 100, 16, 101, 1006, 101, 0, 99]
