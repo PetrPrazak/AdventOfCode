@@ -7,6 +7,8 @@ import re
 import math
 from collections import Counter, defaultdict, namedtuple, deque
 from itertools import permutations, combinations, chain, cycle, product, islice
+import time
+from functools import wraps
 
 
 def transpose(matrix): return zip(*matrix)
@@ -149,6 +151,19 @@ def read_input_lines_separated(filename, sep=','):
 
 def read_input_int_lines(filename):
     return list(map(int, read_input_lines(filename)))
+
+
+def timeit(method):
+    @wraps(method)
+    def timed(*args, **kw):
+        ts = time.time()
+        result = method(*args, **kw)
+        te = time.time()
+        print('%r %2.2f ms' % (method.__name__, (te - ts) * 1000))
+        return result
+
+    return timed
+
 
 
 if __name__ == "__main__":

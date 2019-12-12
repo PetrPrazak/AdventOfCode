@@ -2,25 +2,15 @@ from __future__ import print_function
 from collections import Counter, defaultdict
 from copy import deepcopy
 from math import gcd, asin, sqrt, pi
-import time
-from functools import wraps
+import pathlib
+import sys
+sys.path.append(str(pathlib.Path(__file__).resolve().parent.parent))
+from aoc import timeit
 
 cat = ''.join
 
 INPUT = "aoc2019_10_input.txt"
 TEST = "test.txt"
-
-
-def timeit(method):
-    @wraps(method)
-    def timed(*args, **kw):
-        ts = time.time()
-        result = method(*args, **kw)
-        te = time.time()
-        print('%r %2.2f ms' % (method.__name__, (te - ts) * 1000))
-        return result
-
-    return timed
 
 
 def read_input_lines(filename):
