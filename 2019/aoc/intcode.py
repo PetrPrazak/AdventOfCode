@@ -30,6 +30,7 @@ class IntCode(object):
     TRACE = 0
     TRACE_MEM = 0
     DUMP_MEM = 0
+    TRACE_IO = 0
 
     INSTRUCTIONS = {
         OpCode.ADD: (ARG_READ, ARG_READ, ARG_WRITE),
@@ -56,7 +57,7 @@ class IntCode(object):
     @staticmethod
     def print_code(op, addr_mode, op_mem, data):
         params = len(IntCode.INSTRUCTIONS[op])
-        line =str(op.name)
+        line = str(op.name)
         for p in range(params):
             if addr_mode[p] == 1:
                 format_str = " %d"
@@ -117,7 +118,6 @@ class IntCode(object):
             assert False, "Invalid address mode"
 
     def reset(self):
-        self.mem = defaultdict(int, enumerate(self.program))
         self.pc = 0
         self.base = 0
         self.out_mem = dict()
@@ -131,6 +131,7 @@ class IntCode(object):
         print("<%r>" % self.proc_id, data)
 
     def run(self):
+        self.reset()
         while True:
             op, op_data = self.fetch_instruction()
             next_pc = self.pc + 1 + len(op_data)
@@ -154,19 +155,19 @@ class IntCode(object):
             elif op == OpCode.INP:
                 res = op_data[0]
                 val = self.next_input if self.next_input is not None else (yield)
+                if IntCode.TRACE_IO:
+                    self._trace_mem("INPUT: %r" % val)
                 self.next_input = None
                 if val is None:
                     raise ValueError("wrong input value")
                 self.mem[res] = val
-                if IntCode.TRACE_MEM:
-                    self._trace_mem("%r" % self.mem[res])
                 if IntCode.DUMP_MEM:
                     self._dump_mem(res)
 
             elif op == OpCode.OUT:
                 val = op_data[0]
-                if IntCode.TRACE_MEM:
-                    self._trace_mem("OUT: %r" % val)
+                if IntCode.TRACE_IO:
+                    self._trace_mem("OUTPUT: %r" % val)
                 self.next_input = yield val
 
             elif op == OpCode.JNZ:
