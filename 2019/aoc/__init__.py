@@ -92,6 +92,7 @@ def trace1(f):
 
     return traced_f
 
+
 # https://en.wikipedia.org/wiki/A*_search_algorithm
 def astar_search(start, h_func, moves_func):
     """Find a shortest sequence of states from start to a goal state (a state s with h_func(s) == 0)."""
@@ -116,11 +117,27 @@ def Path(previous, s):
     return [] if (s is None) else Path(previous, previous[s]) + [s]
 
 
-def process(data):
-    # part 1
-    pass
-    # part 2
-    pass
+def minmax_tuples(tuple_list, element=0):
+    res = sorted(tuple_list, key=lambda k: k[element])
+    return res[0][element], res[-1][element]
+
+
+def render_grid(grid):
+    coords = list(grid.keys())
+    min_x, max_x = minmax_tuples(coords, 0)
+    min_y, max_y = minmax_tuples(coords, 1)
+    out = ""
+    for line in range(min_y, max_y + 1):
+        for col in range(min_x, max_x + 1):
+            pos = col, line
+            pixel = grid[pos] if pos in grid else ' '
+            out += pixel
+        out += '\n'
+    return out
+
+
+def print_grid(grid):
+    print(render_grid(grid))
 
 
 def read_input_line(filename):
@@ -163,7 +180,6 @@ def timeit(method):
         return result
 
     return timed
-
 
 
 if __name__ == "__main__":

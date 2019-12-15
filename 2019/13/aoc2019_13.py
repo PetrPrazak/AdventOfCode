@@ -99,26 +99,27 @@ def play(program):
     proc = processor.run()
     out = init_run(proc, 0)
     grid, score = make_grid(out)
-    render.print_grid(grid)
+    # render.print_grid(grid)
     revgrid = reverse_grid(grid)
     ball = revgrid[Object.BALL][0][0]
     paddle = revgrid[Object.PADDLE][0][0]
     joystick = 0
     score = 0
     cycles = 0
-    # render.save_grid(grid, cycles)
+    # render.save_grid(grid, cycles, score)
     while True:
         instruction = read_one_instruction(proc, joystick)
         s = process_instruction(grid, instruction)
         if s is not None:
             score = s
             if get_blocks_count(grid) == 0:
+                # render.save_grid(grid, cycles, score)
                 break
         else:
             obj = Object(instruction[2])
             if obj == Object.BALL:
                 cycles += 1
-                # render.save_grid(grid, cycles)
+                # render.save_grid(grid, cycles, score)
                 # if cycles > 100:
                 #     break
                 ball = instruction[0]
