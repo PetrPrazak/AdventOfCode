@@ -45,6 +45,8 @@ class IntCode(object):
         OpCode.HLT: (),
     }
 
+    INPUT_REQUESTED = "Input"
+
     def __init__(self, program, proc_id=0):
         self.program = program
         self.proc_id = proc_id
@@ -154,7 +156,7 @@ class IntCode(object):
 
             elif op == OpCode.INP:
                 res = op_data[0]
-                val = self.next_input if self.next_input is not None else (yield)
+                val = self.next_input if self.next_input is not None else (yield IntCode.INPUT_REQUESTED)
                 if IntCode.TRACE_IO:
                     self._trace_mem("INPUT: %r" % val)
                 self.next_input = None
