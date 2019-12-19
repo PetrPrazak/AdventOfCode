@@ -56,6 +56,9 @@ class IntCode(object):
         self.out_mem = dict()
         self.next_input = None
 
+    def reset_mem(self):
+        self.mem = defaultdict(int, enumerate(self.program))
+
     @staticmethod
     def print_code(op, addr_mode, op_mem, data):
         params = len(IntCode.INSTRUCTIONS[op])
@@ -73,6 +76,7 @@ class IntCode(object):
         print("%-30s; %r" % (line, data))
 
     def fetch_instruction(self):
+        assert self.pc >= 0
         opcode = self.mem[self.pc]
         addr_mode = [(opcode // 100) % 10, (opcode // 1000) % 10, (opcode // 10000) % 10]
         try:
