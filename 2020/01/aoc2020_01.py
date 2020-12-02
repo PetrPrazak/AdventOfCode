@@ -7,7 +7,7 @@ TOTAL = 2020
 
 def find_two_complements(data, total):
     complement = [total - x for x in data]
-    intersection = list(set(data).intersection(set(complement)))
+    intersection = set(data).intersection(set(complement))
     if len(intersection) != 2:
         return None
     return tuple(intersection)
