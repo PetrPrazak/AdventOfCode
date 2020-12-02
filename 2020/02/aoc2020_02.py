@@ -1,32 +1,35 @@
 # https://adventofcode.com/2020/day/02
 from __future__ import print_function
-from collections import Counter
+from functools import reduce
+
+
+def part1reductor(accum, line):
+    limits, char, pwd = line
+    valid = pwd.count(char) in range(limits[0], limits[1] + 1)
+    return accum + int(valid)
+
+
+def part2reductor(accum, line):
+    positions, char, pwd = line
+    valid = sum([int(pwd[r - 1] == char) for r in positions]) == 1
+    return accum + int(valid)
+
 
 def part1(data):
-    acc = 0
-    for line in data:
-        range, char, pwd = line
-        ctr = Counter(pwd)
-        if  range[0] <= ctr[char] <= range[1]:
-            acc += 1
+    acc = reduce(part1reductor, data, 0)
     print("part 1:", acc)
 
 
 def part2(data):
-    acc = 0
-    for line in data:
-        range, char, pwd = line
-        pos = sum([int(pwd[r - 1] == char) for r in range])
-        if pos == 1:
-            acc += 1
+    acc = reduce(part2reductor, data, 0)
     print("part 2:", acc)
 
 
 def parse(line):
-    range, char, pwd = line.split(' ')
-    range = [int(n) for n in range.split('-')]
+    bounds, char, pwd = line.split(' ')
+    bounds = [int(n) for n in bounds.split('-')]
     char = char[0]
-    return (range, char, pwd)
+    return (bounds, char, pwd)
 
 
 def main(file):
