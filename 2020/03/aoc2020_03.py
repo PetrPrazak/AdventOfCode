@@ -6,14 +6,12 @@ from operator import mul
 
 def check_slope(data, off_x, off_y):
     result = 0
-    pos_x, pos_y = 0, 0
+    pos_x, pos_y = 0, off_y
     height, width = len(data), len(data[0])
-    while True:
-        pos_y += off_y
-        if pos_y >= height:
-            break
+    while pos_y < height:
         pos_x = (pos_x + off_x) % width
         result += int(data[pos_y][pos_x] == '#')
+        pos_y += off_y
     return result
 
 
