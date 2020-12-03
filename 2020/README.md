@@ -1,4 +1,4 @@
-Advent of Code 2020
+# Advent of Code 2020
 Copyright (c) Eric Wastl
 #### [Direct Link](https://adventofcode.com/2020)
 
