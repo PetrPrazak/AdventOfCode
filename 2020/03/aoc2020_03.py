@@ -1,0 +1,44 @@
+# https://adventofcode.com/2020/day/3
+from __future__ import print_function
+from functools import reduce
+from operator import mul
+
+
+def check_slope(data, off_x, off_y):
+    result = 0
+    pos_x = 0
+    pos_y = 0
+    width = len(data[0])
+    height = len(data)
+    while True:
+        pos_y += off_y
+        if pos_y >= height:
+            break
+        pos_x = (pos_x + off_x) % width
+        result += int(data[pos_y][pos_x] == '#')
+    return result
+
+
+def part1(data):
+    result = check_slope(data, 3, 1)
+    print("part 1:", result)
+
+
+def part2(data):
+    slopes = [(1,1), (3,1), (5,1), (7,1), (1,2)]
+    trees = [check_slope(data, off_x, off_y) for off_x, off_y in slopes]
+    result = reduce(mul, trees)
+    print("part 2:", result)
+
+
+def main(file):
+    print(file)
+    with open(file) as f:
+        data = [l.strip() for l in f.readlines()]
+        part1(data)
+        part2(data)
+
+
+if __name__ == "__main__":
+    main("test.txt")
+    main("input.txt")

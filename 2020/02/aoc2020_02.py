@@ -1,4 +1,4 @@
-# https://adventofcode.com/2020/day/02
+# https://adventofcode.com/2020/day/2
 from __future__ import print_function
 from functools import reduce
 
