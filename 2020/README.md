@@ -2,7 +2,7 @@
 Copyright (c) Eric Wastl
 #### [Direct Link](https://adventofcode.com/2020)
 
-# Intro
+## Intro
 
 After saving Christmas *five years in a row*, you've decided to take a vacation at a nice resort on a tropical island. Surely, Christmas will go on without you.
 

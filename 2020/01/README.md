@@ -2,7 +2,7 @@
 Copyright (c) Eric Wastl
 #### [Source](https://adventofcode.com/2020/day/1)
 
-# Part 1
+## Part 1
 
 Before you leave, the Elves in accounting just need you to fix your *expense report* (your puzzle input); apparently, something isn't quite adding up.
 
