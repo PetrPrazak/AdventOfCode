@@ -69,7 +69,7 @@ def parse_line(line):
     return dict([field.split(":") for field in line.split()])
 
 
-def nerge_lines(fileobj):
+def merge_lines(fileobj):
     """
     Joins the lines until the empty line or EOF
     """
@@ -85,7 +85,7 @@ def nerge_lines(fileobj):
 
 
 def load_data(fileobj):
-    return [parse_line(line) for line in nerge_lines(fileobj)]
+    return [parse_line(line) for line in merge_lines(fileobj)]
 
 
 def main(file):
