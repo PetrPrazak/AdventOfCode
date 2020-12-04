@@ -51,59 +51,47 @@ fields = {'byr': byr_valid, 'iyr': iyr_valid, 'eyr': eyr_valid, 'hgt': hgt_valid
 
 
 def all_fields_are_present(passport):
-    cnt = 0
-    for key in fields.keys():
-        if key in passport:
-            cnt += 1
-    return cnt == len(fields)
+    return all(key in passport for key in fields.keys())
 
 
 def values_ok(passport):
-    for key in fields.keys():
-        value = passport[key]
-        if not fields[key](value):
-            return False
-    return True
+    return all(fields[key](passport[key]) for key in fields.keys())
 
 
 def process(data):
-    valids = 0
-    checked = 0
-    for passport in data:
-        valid = all_fields_are_present(passport)
-        if valid:
-            valids += 1
-            if values_ok(passport):
-                checked += 1
-
-    print("part 1:", valids)
-    print("part 2:", checked)
+    valid_passports = [p for p in data if all_fields_are_present(p)]
+    print("Part 1:", len(valid_passports))
+    correct_passports = [p for p in valid_passports if values_ok(p)]
+    print("Part 2:", len(correct_passports))
 
 
-def parse_line(outdict, line):
-    fields = line.split()
-    for field in fields:
-        key, value = field.split(':')
-        outdict[key] = value
+def parse_line(line):
+    return dict([field.split(":") for field in line.split()])
 
 
-def load_data(lines):
-    passwords = [dict()]
-    idx = 0
-    for line in lines:
+def nerge_lines(fileobj):
+    """
+    Joins the lines until the empty line or EOF
+    """
+    complete = []
+    for line in fileobj:
         line = line.strip()
         if not line:
-            passwords.append(dict())
-            idx += 1
-        else:
-            parse_line(passwords[idx], line)
-    return passwords
+            yield ' '.join(complete)
+            complete = []
+        complete.append(line)
+    if complete:
+        yield ' '.join(complete)
+
+
+def load_data(fileobj):
+    return [parse_line(line) for line in nerge_lines(fileobj)]
 
 
 def main(file):
     print(file)
     with open(file) as f:
-        process(load_data(f.readlines()))
+        process(load_data(f))
 
 
 if __name__ == "__main__":
