@@ -23,7 +23,7 @@ def count_bags(bags, color):
 def process(bags):
     my_bag = "shiny gold"
     # part 1
-    result = sum(1 if contains(bags, color, my_bag) else 0 for color in bags)
+    result = sum(int(contains(bags, color, my_bag)) for color in bags)
     print("part 1:", result)
     # part 2
     result = count_bags(bags, my_bag)
@@ -31,7 +31,7 @@ def process(bags):
 
 
 def parse_line(line):
-    color, rest = line.rstrip().split(" bags contain")
+    color, rest = line.rstrip().split(" bags contain ")
     contain = [(color, int(count))
                for count, color in re.findall(r"(\d+) ([\w ]+) bag", rest)]
     return color, contain
