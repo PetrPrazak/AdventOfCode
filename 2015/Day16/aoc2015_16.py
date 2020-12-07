@@ -40,7 +40,7 @@ def process(data):
     print("Part 2:", result[0])
 
 
-def convert_prop(prop):
+def parse_prop(prop):
     prop_name, value = prop.split(': ')
     return prop_name, int(value)
 
@@ -49,7 +49,7 @@ def parse(line):
     sep = line.find(':')
     name = int(line[:sep].split()[1])
     props = line[sep+2:].split(', ')
-    line = [convert_prop(prop) for prop in props]
+    line = [parse_prop(prop) for prop in props]
     return name, line
 
 
