@@ -32,17 +32,14 @@ def process(bags):
 
 def parse_line(line):
     color, rest = line.rstrip().split(" bags contain")
-    # print(color, rest)
     contain = [(color, int(count))
                for count, color in re.findall(r"(\d+) ([\w ]+) bag", rest)]
     return color, contain
 
 
 def load_data(fileobj):
-    bags = dict()
     colors = [parse_line(line) for line in fileobj]
-    for color, contain in colors:
-        bags[color] = dict(contain)
+    bags = {color: dict(contain) for color, contain in colors}
     return bags
 
 
