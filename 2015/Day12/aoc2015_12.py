@@ -11,10 +11,7 @@ def sum_numbers(data):
 
 
 def object_hook(d):
-    for _, v in d.items():
-        if v == "red":
-            return dict()
-    return d
+    return d if "red" not in d.values() else dict()
 
 
 def part2(data):
