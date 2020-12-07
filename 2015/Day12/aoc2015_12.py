@@ -5,17 +5,9 @@ import re
 import json
 
 
-num_re = re.compile(r'(-?\d+)')
-
-
 def sum_numbers(data):
-    match = num_re.search(data)
-    acc = 0
-    while match:
-        num = int(match.group(1))
-        acc += num
-        match = num_re.search(data, match.span(1)[1]+1)
-    return acc
+    numbers = re.findall((r'(-?\d+)'), data)
+    return sum(int(val) for val in numbers)
 
 
 def object_hook(d):
@@ -26,9 +18,8 @@ def object_hook(d):
 
 
 def part2(data):
-    o = json.loads(data, object_hook=object_hook)
-    data = json.dumps(o)
-    return sum_numbers(data)
+    obj = json.loads(data, object_hook=object_hook)
+    return sum_numbers(json.dumps(obj))
 
 
 def process(data):
