@@ -7,10 +7,7 @@ def contains(bags, colorbag, color):
     contents = bags[colorbag]
     if not contents:
         return False
-    if color in contents:
-        return True
-    else:
-        return any(contains(bags, c, color) for c in contents)
+    return True if color in contents else any(contains(bags, c, color) for c in contents)
 
 
 def count_bags(bags, color):
