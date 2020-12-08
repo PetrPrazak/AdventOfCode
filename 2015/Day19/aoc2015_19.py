@@ -4,13 +4,9 @@ import re
 from itertools import chain
 
 
-def get_all_replacements(molecule, pattern, replacement):
-    pos = -1
-    while True:
-        pos = molecule.find(pattern, pos+1)
-        if pos == -1:
-            return
-        yield molecule[:pos] + replacement + molecule[pos+len(pattern):]
+def get_all_replacements(text, pattern, replacement):
+    for match in re.finditer(pattern, text):
+        yield text[:match.start()] + replacement + text[match.end():]
 
 
 def apply_replacements(molecule, replacements):
