@@ -32,7 +32,6 @@ def patch_and_run(data):
 
 
 def process(data):
-    # pprint(data)
     # part 1
     result = run(data)
     print("part 1:", result[0])
