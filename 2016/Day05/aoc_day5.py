@@ -1,14 +1,13 @@
-
+# http://adventofcode.com/2016/day/5
 from __future__ import print_function
-import md5
+from hashlib import md5
 
 
 def solve(prefix):
-
     nums = 0
     password = "        "
     for i in range(100000000):
-        dig = md5.new(prefix + str(i)).hexdigest()
+        dig = md5((prefix + str(i)).encode('utf-8')).hexdigest()
         if dig[:5] == '00000':
             if '0' <= dig[5] < '8':
                 pos = int(dig[5])
