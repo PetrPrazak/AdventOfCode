@@ -61,12 +61,12 @@ def values_ok(passport):
 def process(data):
     valid_passports = [p for p in data if all_fields_are_present(p)]
     print("Part 1:", len(valid_passports))
-    correct_passports = [p for p in valid_passports if values_ok(p)]
-    print("Part 2:", len(correct_passports))
+    correct_passports = sum(1 for p in valid_passports if values_ok(p))
+    print("Part 2:", correct_passports)
 
 
 def parse_line(line):
-    return dict([field.split(":") for field in line.split()])
+    return dict(field.split(":") for field in line.split())
 
 
 def merge_lines(fileobj):
