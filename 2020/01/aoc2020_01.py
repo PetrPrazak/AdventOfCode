@@ -8,9 +8,7 @@ TOTAL = 2020
 def find_two_complements(data, total):
     complement = [total - x for x in data]
     intersection = set(data).intersection(set(complement))
-    if len(intersection) != 2:
-        return None
-    return tuple(intersection)
+    return tuple(intersection) if len(intersection) == 2 else None
 
 
 def find_three_complements(data, total):
@@ -18,7 +16,7 @@ def find_three_complements(data, total):
         rest = data.copy()
         del rest[idx]
         rest_two = find_two_complements(rest, total - num)
-        if rest_two is not None:
+        if rest_two:
             break
     return num, rest_two[0], rest_two[1]
 
