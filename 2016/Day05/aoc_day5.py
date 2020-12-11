@@ -7,7 +7,7 @@ def solve(prefix):
     nums = 0
     password = "        "
     for i in range(100000000):
-        dig = md5((prefix + str(i)).encode('utf-8')).hexdigest()
+        dig = md5((prefix + str(i)).encode('ascii')).hexdigest()
         if dig[:5] == '00000':
             if '0' <= dig[5] < '8':
                 pos = int(dig[5])
