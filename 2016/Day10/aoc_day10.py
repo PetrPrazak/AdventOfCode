@@ -52,7 +52,7 @@ def solve(lines):
             raise NotImplementedError(part)
 
     print("Part 1:", [k for k in bots
-                      if 61 in bots[k] ["d"] and 17 in bots[k]["d"]][0])
+                      if 61 in bots[k]["d"] and 17 in bots[k]["d"]][0])
     print("Part 2:", prod([outputs[0], outputs[1], outputs[2]]))
 
 
