@@ -16,6 +16,7 @@ def process(data):
     # part 1
     result = sum(count_answers(group.split()) for group in data)
     print("Part 1:", result)
+
     # part 2
     result = sum(count_all_answers(group.split()) for group in data)
     print("Part 2:", result)
