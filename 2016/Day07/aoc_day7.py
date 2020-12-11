@@ -1,10 +1,10 @@
+# http://adventofcode.com/2016/day/7
 from __future__ import print_function
 
 
 def find_abba(word):
     for p in range(len(word) - 3):
         abba = word[p:p + 4]
-        # print(abba)
         if abba[0] == abba[3] and abba[1] == abba[2] and abba[0] != abba[1]:
             return abba
     return None
@@ -21,13 +21,13 @@ def check_parts(parts):
     return has_abba
 
 
-def solve(lines):
+def solve1(lines):
     suma = 0
     for line in lines:
         parts = [w.split('[') for w in line.strip().split(']')]
         if check_parts(parts):
             suma += 1
-    print(suma)
+    print("Part 1:", suma)
 
 
 def abas(word):
@@ -38,14 +38,11 @@ def abas(word):
 
 
 def check_parts2(supernets, hypernets, line):
-    print(line)
     for part in supernets:
         for aba in abas(part):
-            # print("aba:", aba)
             bab = aba[1] + aba[0] + aba[1]
             for h in hypernets:
                 if h.find(bab) != -1:
-                    # print("Match", h, aba, bab)
                     return True
     return False
 
@@ -59,14 +56,16 @@ def solve2(lines):
         hypernets = [p[1] for p in parts if len(p) > 1]
         if check_parts2(supernets, hypernets, line):
             suma += 1
+    print("Part 2:", suma)
 
-    print(suma)
 
+def main(file):
+    with open(file) as f:
+        l = f.readlines()
+    solve1(l)
+    solve2(l)
 
-# INPUT = "aoc_day7_test.txt"
-INPUT = "aoc_day7_input.txt"
 
 if __name__ == "__main__":
-    with open(INPUT) as f:
-        l = f.readlines()
-    solve2(l)
+    # main("aoc_day7_test.txt")
+    main("aoc_day7_input.txt")
