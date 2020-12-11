@@ -9,13 +9,13 @@ def get_id(board_pass):
 
 
 def eliminate(seats):
-    missing = set(range(min(seats), max(seats))) - set(seats)
+    missing = set(range(min(seats), max(seats))) - seats
     return missing
 
 
 def process(data):
     # part 1
-    seats = [get_id(bp) for bp in data]
+    seats = {get_id(bp) for bp in data}
     print("part 1:", max(seats))
     # part 2
     myid = eliminate(seats)
