@@ -11,7 +11,7 @@ def part1reductor(accum, line):
 
 def part2reductor(accum, line):
     positions, char, pwd = line
-    valid = sum([int(pwd[r - 1] == char) for r in positions]) == 1
+    valid = sum(int(pwd[r - 1] == char) for r in positions) == 1
     return accum + int(valid)
 
 
