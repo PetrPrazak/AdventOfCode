@@ -1,8 +1,6 @@
 # https://adventofcode.com/2020/day/3
 from __future__ import print_function
-from functools import reduce
-from operator import mul
-
+from math import prod
 
 def check_slope(data, off_x, off_y):
     result = 0
@@ -22,8 +20,7 @@ def part1(data):
 
 def part2(data):
     slopes = [(1,1), (3,1), (5,1), (7,1), (1,2)]
-    trees = [check_slope(data, off_x, off_y) for off_x, off_y in slopes]
-    result = reduce(mul, trees)
+    result = prod(check_slope(data, off_x, off_y) for off_x, off_y in slopes)
     print("part 2:", result)
 
 
