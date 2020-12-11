@@ -20,19 +20,8 @@ directions = [(0, +1),
               (-1, 0)]
 
 
-def block_in_grid(grid, get_block, pos):
-    if pos in grid:
-        block = grid[pos]
-    else:
-        block = get_block(pos)
-        grid[pos] = block
-    return block
-
-
 def walk_grid(get_block, source, target=None, max_dist=None):
-    grid = dict()
     dist = dict()
-    grid[source] = 'O'
     dist[source] = 0
     Q = deque()
     Q.append(source)
@@ -44,14 +33,14 @@ def walk_grid(get_block, source, target=None, max_dist=None):
             if newx < 0 or newy < 0:
                 continue                   # reached the bounds of the grid
             pos = newx, newy
-            block = block_in_grid(grid, get_block, pos)
+            if pos in dist:
+                continue                   # already visited
+            block = get_block(pos)
             if block != FLOOR:
-                continue                   # inaccessible or already visited
+                continue                   # inaccessible
             if max_dist and dist[(x, y)] >= max_dist:
                 continue
-            grid[pos] = 'O'                # mark visit
-            if pos not in dist:
-                dist[pos] = dist[(x, y)] + 1
+            dist[pos] = dist[(x, y)] + 1
             if pos == target:
                 return dist                # goal is reached
             Q.append(pos)
@@ -65,7 +54,7 @@ def solve(fav_number):
     result = dist[(31, 39)]
     print("Part 1:", result)
     # part 2
-    dist = walk_grid(get_block, (1, 1), None, 50)
+    dist = walk_grid(get_block, (1, 1), max_dist=50)
     result = len(dist)
     print("Part 2:", result)
 
