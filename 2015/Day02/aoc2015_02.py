@@ -1,6 +1,4 @@
-"""
-http://adventofcode.com/2015/day/2
-"""
+# http://adventofcode.com/2015/day/2
 from __future__ import print_function
 
 with open("input.txt") as f:
