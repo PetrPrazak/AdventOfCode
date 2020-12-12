@@ -17,21 +17,33 @@ def move_pos(pos, value, dx, dy):
     return x + dx * value, y + dy * value
 
 
+def rotate(order, value, bearing=0):
+    if order == 'L':
+        value = -value
+    turn = value // 90
+    return (bearing + turn) % 4
+
+
 def move_ship(orders):
-    facing = 1  # east
+    bearing = 1  # east
     pos = 0, 0
     for order, value in orders:
         if order in ['R', 'L']:
-            if order == 'L':
-                value = -value
-            turn = value // 90
-            facing = (facing + turn) % 4
+            bearing = rotate(order, value, bearing)
         elif order == 'F':
-            pos = move_pos(pos, value, *directions[facing])
+            pos = move_pos(pos, value, *directions[bearing])
         else:
             pos = move_pos(pos, value, *directions[orientations.index(order)])
     return distance(*pos)
 
+
+def rotate_waypoint(waypoint, turn):
+    signx, signy = rotations[turn]
+    x, y = waypoint
+    waypoint = x * signx, y * signy
+    if turn % 2 == 1:
+        waypoint = tuple(reversed(waypoint))
+    return waypoint
 
 
 def move_ship_waypoint(orders):
@@ -39,19 +51,13 @@ def move_ship_waypoint(orders):
     waypoint = 10, 1   # offset to the ship
     for order, value in orders:
         if order in ['R', 'L']:
-            if order == 'L':
-                value = -value
-            turn = (value // 90) % 4
-            signx, signy = rotations[turn]
-            x, y = waypoint
-            if turn % 2 == 1:
-                waypoint = y * signy, x * signx
-            else:
-                waypoint = x * signx, y * signy
+            turn = rotate(order, value)
+            waypoint = rotate_waypoint(waypoint, turn)
         elif order == 'F':
             shippos = move_pos(shippos, value, *waypoint)
         else:
-            waypoint = move_pos(waypoint, value, *directions[orientations.index(order)])
+            waypoint = move_pos(waypoint, value,
+                                *directions[orientations.index(order)])
     return distance(*shippos)
 
 
