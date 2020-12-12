@@ -40,10 +40,10 @@ def move_ship(orders):
 def rotate_waypoint(waypoint, turn):
     signx, signy = rotations[turn]
     x, y = waypoint
-    waypoint = x * signx, y * signy
-    if turn % 2 == 1:
-        waypoint = tuple(reversed(waypoint))
-    return waypoint
+    if turn % 2 == 0:
+        return x * signx, y * signy
+    else:
+        return y * signy, x * signx
 
 
 def move_ship_waypoint(orders):
