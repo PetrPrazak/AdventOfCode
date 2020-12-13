@@ -1,6 +1,6 @@
 # https://adventofcode.com/2020/day/13
 from __future__ import print_function
-from math import prod
+from math import prod, gcd
 
 
 def find_bus(timestamp, buses):
@@ -27,13 +27,24 @@ def mul_inv(a, b):
     return x1
 
 
-def chinese_remainder(buses):
-    prd = prod(b for b, _ in buses)
+# parameter: list of (module, remainder) tuples
+def chinese_remainder(factors):
+    """
+    The Chinese Remainder Theorem supposes that given the
+    integers n_1...n_k that are pairwise co-prime, then for
+    any sequence of integers a_1...a_k there exists an integer
+    x that solves the system of linear congruences:
+
+    x === a_1 (mod n_1)
+    ...
+    x === a_k (mod n_k)
+    """
+    assert gcd(*[n for n, _ in factors]) == 1
+    prd = prod(n for n, _ in factors)
     suma = 0
-    for b, id in buses:
-        rem = (b - id) % b
-        p = prd // b
-        suma += rem * mul_inv(p, b) * p
+    for n_i, rem_i in factors:
+        p = prd // n_i
+        suma += rem_i * mul_inv(p, n_i) * p
     return suma % prd
 
 
@@ -42,7 +53,8 @@ def process(data):
     result = find_bus(*data)
     print("part 1:", result)
     # part 2
-    result = chinese_remainder(data[1])
+    factors = [(b, (b - id) % b) for b, id in data[1]]
+    result = chinese_remainder(factors)
     print("part 2:", result)
 
 
