@@ -22,7 +22,7 @@ def main(file):
         # read all in once
         data = f.read()
         solve(data)
-        # read by lines
+        # or read by lines
         lines = [parse(l.strip()) for l in f.readlines()]
         solve(lines)
 
