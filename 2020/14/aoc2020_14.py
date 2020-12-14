@@ -1,6 +1,5 @@
 # https://adventofcode.com/2020/day/14
 from __future__ import print_function
-from collections import defaultdict
 
 
 def parse_mask(line):
@@ -14,13 +13,13 @@ def masked(val, mask):
         if m > 0:
             val |= m
         else:
-            val &= m - 1
+            val &= m - 1   # already negative -> turn to 2'complement
     return val
 
 
 def part1(data):
     mask = []
-    mem = defaultdict(int)
+    mem = dict()
     for addr, val in data:
         if addr is None:
             mask = parse_mask(val)
@@ -30,39 +29,33 @@ def part1(data):
 
 
 def parse_mem_mask(line):
-    ones = [2 ** i for i, b in enumerate(reversed(line))
-            if b == '1']
-    floats = [2 ** i for i, b in enumerate(reversed(line))
-              if b == 'X']
+    ones = [2 ** i for i, b in enumerate(reversed(line)) if b == '1']
+    floats = [2 ** i for i, b in enumerate(reversed(line)) if b == 'X']
     return ones, floats
 
 
-def print_bits(addr):
-    print(format(addr, "b"), addr)
-
-
-def apply_masks(mem, addr, val, mask):
-    ones, floats = mask
+def apply_masks(mem, addr, val, masks):
+    ones, floats = masks
     for o in ones:
         addr |= o
-    for l in range(2 ** len(floats)):
+    for flt in range(2 ** len(floats)):
         faddr = addr
-        for bit, orig in enumerate(floats):
-            if l & (2 ** bit) == 0:
-                faddr &= ~orig
+        for bit, orig_bit in enumerate(floats):
+            if flt & (2 ** bit) == 0:
+                faddr &= ~orig_bit
             else:
-                faddr |= orig
+                faddr |= orig_bit
         mem[faddr] = val
 
 
 def part2(data):
-    mask = ([], [])
-    mem = defaultdict(int)
+    masks = ([], [])
+    mem = dict()
     for addr, val in data:
         if addr is None:
-            mask = parse_mem_mask(val)
+            masks = parse_mem_mask(val)
         else:
-            apply_masks(mem, addr, val, mask)
+            apply_masks(mem, addr, val, masks)
     return mem
 
 
@@ -82,7 +75,7 @@ def parse_line(line):
     if l == 'mask':
         return None, r
     else:
-        idx = l.find(']')
+        idx = l.find(']')  # mem[xxx]
         return int(l[4:idx]), int(r)
 
 
