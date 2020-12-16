@@ -1,7 +1,4 @@
-"""
-http://adventofcode.com/2017/day/25
-
-"""
+# http://adventofcode.com/2017/day/25
 from __future__ import print_function
 from collections import defaultdict
 from time import time
@@ -18,7 +15,6 @@ states = [[(1, 1, 1), (1, 0, -1)],
 
 def solve():
     tape = defaultdict(int)
-
     state = 0  # 'A'
     pos = 0
     for _ in range(12861455):
