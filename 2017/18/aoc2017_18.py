@@ -1,8 +1,4 @@
-"""
-http://adventofcode.com/2017/day/18
-
-"""
-
+# http://adventofcode.com/2017/day/18
 from __future__ import print_function
 from collections import defaultdict, deque
 
@@ -24,7 +20,8 @@ def part1(prog):
 
 def part2(prog):
     queue = [deque(), deque()]
-    p0, p1 = DuetVM(prog, 0, queue[0], queue[1]), DuetVM(prog, 1, queue[1], queue[0])
+    p0, p1 = DuetVM(prog, 0, queue[0], queue[1]), DuetVM(
+        prog, 1, queue[1], queue[0])
     while True:
         if not p0.step() and not p1.step():
             break
@@ -78,11 +75,8 @@ class DuetVM(object):
         return True
 
 
-INPUT = "aoc_day18_input.txt"
-# INPUT = "aoc_day18_test.txt"
-
 if __name__ == "__main__":
-    with open(INPUT) as f:
+    with open("input.txt") as f:
         # read by lines
         lines = f.readlines()
         solve(lines)
