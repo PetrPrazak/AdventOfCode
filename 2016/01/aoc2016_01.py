@@ -30,10 +30,9 @@ def get_all_new_pos(pos, direction, steps):
 
 
 def solve(codes, part):
-    direction = 0
     visits = {}
     pos = 0, 0
-    count = 0
+    direction, count = 0, 0
     visits[pos] = count
     for code in codes:
         is_right, steps = code
