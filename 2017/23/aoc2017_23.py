@@ -1,6 +1,4 @@
-"""
-http://adventofcode.com/2017/day/23
-"""
+# http://adventofcode.com/2017/day/23
 from __future__ import print_function
 from collections import defaultdict
 
@@ -12,7 +10,6 @@ except NameError:
 
 def solve(lines):
     prog = [x.strip().split() for x in lines]
-
     part1(prog)
     part2()
 
@@ -68,11 +65,8 @@ class Coprocessor(object):
         return True
 
 
-INPUT = "aoc_day23_input.txt"
-
-
 def main():
-    with open(INPUT) as f:
+    with open("input.txt") as f:
         # read by lines
         lines = f.readlines()
         solve(lines)
