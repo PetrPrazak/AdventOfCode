@@ -45,4 +45,4 @@ def main(file):
 
 
 if __name__ == "__main__":
-    main("aoc_day9_input.txt")
+    main("input.txt")
