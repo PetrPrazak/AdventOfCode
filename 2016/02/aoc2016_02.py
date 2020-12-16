@@ -66,7 +66,7 @@ def solve2(line):
 
 
 if __name__ == "__main__":
-    with open("day2_input.txt") as f:
+    with open("input.txt") as f:
         lines = [l.strip() for l in f.readlines()]
         solve1(lines)
         solve2(lines)
