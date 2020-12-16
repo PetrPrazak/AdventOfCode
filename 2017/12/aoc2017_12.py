@@ -1,11 +1,4 @@
-# replace XX with day
-
-"""
-
-http://adventofcode.com/2017/day/12
-
-
-"""
+# http://adventofcode.com/2017/day/12
 from __future__ import print_function
 from collections import defaultdict, Counter
 
@@ -46,12 +39,8 @@ def solve(lines):
     print(len(groups))
 
 
-INPUT = "aoc_day12_input.txt"
-# INPUT = "aoc_day12_test.txt"
-
-
 if __name__ == "__main__":
-    with open(INPUT) as f:
+    with open("input.txt") as f:
         # read by lines
         lines = f.readlines()
         solve(lines)
