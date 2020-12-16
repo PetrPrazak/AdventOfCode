@@ -1,8 +1,4 @@
-"""
-http://adventofcode.com/2017/day/15
-
-"""
-
+# http://adventofcode.com/2017/day/15
 from __future__ import print_function
 
 # Generator A starts with 873
