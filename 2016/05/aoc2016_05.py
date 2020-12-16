@@ -21,5 +21,5 @@ def solve(prefix):
 
 
 if __name__ == "__main__":
-    # solve('abc')
+    solve('abc')
     solve('wtnhxymk')
