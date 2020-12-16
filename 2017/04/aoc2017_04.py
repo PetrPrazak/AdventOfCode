@@ -24,7 +24,7 @@ def better_solve(lines, part):
     for line in lines:
         l = line.split()
         if part == 2:
-            l = ["".join(sorted(word))  for word in l]
+            l = ["".join(sorted(word)) for word in l]
         if len(l) == len(set(l)):
             asum += 1
     print(asum)
@@ -33,5 +33,5 @@ def better_solve(lines, part):
 if __name__ == "__main__":
     with open("input.txt") as f:
         thelines = f.readlines()
-        better_solve(thelines,1)
-        better_solve(thelines,2)
+        better_solve(thelines, 1)
+        better_solve(thelines, 2)
