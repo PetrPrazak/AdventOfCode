@@ -80,7 +80,7 @@ def parse_fields(lines):
 
 def parse_tickets(lines):
     _, *data = lines.split("\n")
-    return [[int(f) for f in l.strip().split(",")] for l in data]
+    return [[int(f) for f in l.split(",")] for l in data if l]
 
 
 def load_data(fileobj):
