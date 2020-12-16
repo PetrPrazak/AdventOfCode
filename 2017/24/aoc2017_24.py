@@ -1,7 +1,4 @@
-"""
-http://adventofcode.com/2017/day/24
-
-"""
+# http://adventofcode.com/2017/day/24
 from __future__ import print_function
 from collections import defaultdict
 from time import time
@@ -43,13 +40,9 @@ def solve(lines):
     print("Part 2:", s)
 
 
-INPUT = "aoc_day24_input.txt"
-# INPUT = "aoc_day24_test.txt"
-
-
 def main():
     start = time()
-    with open(INPUT) as f:
+    with open("input.txt") as f:
         # read by lines
         lines = f.readlines()
         solve(lines)
