@@ -1,9 +1,4 @@
-"""
-
-http://adventofcode.com/2017/day/22
-
-
-"""
+# http://adventofcode.com/2017/day/22
 from __future__ import print_function
 from collections import defaultdict
 
@@ -12,7 +7,7 @@ def solve(lines):
     inp = [list(line.strip()) for line in lines]
     grid = defaultdict(lambda: '.')
     for i, l in enumerate(inp):
-        for j, node in enumerate(inp[i]):
+        for j in range(len(inp[i])):
             grid[(j, i)] = l[j]
 
     starty = len(inp) // 2
@@ -49,16 +44,8 @@ def walk(x, y, grid, states, rotations, reps):
     print(count)
 
 
-INPUT = "aoc_day22_input.txt"
-# INPUT = "aoc_day22_test.txt"
-
-
 def main():
-    with open(INPUT) as f:
-        # read all in once
-        # data = f.read()
-        # solve(data)
-        # read by lines
+    with open("input.txt") as f:
         lines = f.readlines()
         solve(lines)
 
