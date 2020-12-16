@@ -1,16 +1,9 @@
-"""
-
-http://adventofcode.com/2017/day/16
-
-
-"""
+# http://adventofcode.com/2017/day/16
 from __future__ import print_function
 
-"""
-s1, a spin of size 1: eabcd.
-x3/4, swapping the last two programs: eabdc.
-pe/b, swapping programs e and b: baedc.
-"""
+# s1, a spin of size 1: eabcd.
+# x3/4, swapping the last two programs: eabdc.
+# pe/b, swapping programs e and b: baedc.
 
 # make the script version agnostic
 try:
@@ -49,11 +42,8 @@ def dance(reps, moves):
     print("".join(row))
 
 
-INPUT = "aoc_day16_input.txt"
-# INPUT = "aoc_day16_test.txt"
-
 if __name__ == "__main__":
-    with open(INPUT) as f:
+    with open("input.txt") as f:
         # read all in once
         data = f.read()
         solve(data)
