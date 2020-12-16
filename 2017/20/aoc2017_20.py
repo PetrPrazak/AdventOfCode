@@ -1,7 +1,4 @@
-"""
-http://adventofcode.com/2017/day/20
-
-"""
+# http://adventofcode.com/2017/day/20
 from __future__ import print_function
 from collections import defaultdict
 
@@ -77,7 +74,8 @@ def solve(lines, part=0):
                 if len(v) > 1:
                     todel |= set(v)
             if todel:
-                particles = [item for index, item in enumerate(particles) if index not in todel]
+                particles = [item for index, item in enumerate(
+                    particles) if index not in todel]
                 if not particles:
                     break
 
@@ -89,12 +87,8 @@ def solve(lines, part=0):
         print(len(particles))
 
 
-INPUT = "aoc_day20_input.txt"
-# INPUT = "aoc_day20_test.txt"
-
-
 def main():
-    with open(INPUT) as f:
+    with open("input.txt") as f:
         lines = f.readlines()
         solve(lines)
         solve(lines, 1)
