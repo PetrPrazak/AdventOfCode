@@ -1,6 +1,6 @@
 # Day 1: Inverse Captcha
 Copyright (c) Eric Wastl
-#### [Source](https://adventofcode.com/{y}/day/{d})
+#### [Source](https://adventofcode.com/2017/day/1)
 
 ## Part 1
 
