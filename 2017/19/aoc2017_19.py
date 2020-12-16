@@ -1,16 +1,12 @@
-"""
-
-http://adventofcode.com/2017/day/19
-
-
-"""
+# http://adventofcode.com/2017/day/19
 from __future__ import print_function
 
 
 def solve(lines):
     # init
     maxlen = max(len(line) for line in lines)
-    chart = [list(line.strip('\n') + " " * (maxlen - len(line))) for line in lines]
+    chart = [list(line.strip('\n') + " " * (maxlen - len(line)))
+             for line in lines]
 
     path = ""
     x, y = chart[0].index('|'), 0
@@ -46,12 +42,8 @@ def solve(lines):
     print(steps, path)
 
 
-INPUT = "aoc_day19_input.txt"
-# INPUT = "aoc_day19_test.txt"
-
-
 def main():
-    with open(INPUT) as f:
+    with open("input.txt") as f:
         # read by lines
         lines = f.readlines()
         solve(lines)
