@@ -62,4 +62,4 @@ def main(file):
 
 
 if __name__ == "__main__":
-    main("day1_input.txt")
+    main("input.txt")
