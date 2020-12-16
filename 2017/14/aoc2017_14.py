@@ -1,9 +1,4 @@
-"""
-
-http://adventofcode.com/2017/day/14
-
-
-"""
+# http://adventofcode.com/2017/day/14
 from __future__ import print_function
 from functools import reduce
 
@@ -42,7 +37,8 @@ def knot_hash(data):
     ring = knot_hash_data(data, 256)
     out = []
     for block in range(16):
-        out.append(reduce(lambda x, y: x ^ y, ring[block * 16:block * 16 + 16]))
+        out.append(reduce(lambda x, y: x ^ y,
+                          ring[block * 16:block * 16 + 16]))
     khash = "".join("{:02x}".format(x) for x in out)
     return khash
 
@@ -53,7 +49,8 @@ def solve(pwd):
     grid = []
     for line in range(128):
         khash = knot_hash(pwd + '-' + str(line))
-        bins = "".join([bin(int(x, 16))[2:].rjust(4, '0') for x in list(khash)])
+        bins = "".join([bin(int(x, 16))[2:].rjust(4, '0')
+                        for x in list(khash)])
         total += bins.count("1")
         grid.append(list(bins))
 
