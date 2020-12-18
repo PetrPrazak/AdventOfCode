@@ -40,15 +40,16 @@ def get_token(line):
             i = j
             yield Token.NUM, num
         else:
-            assert False, f"unexpected char '{char}' at {i}: '{line[i:]}'"
+            assert False, f"unexpected char '{char}' at {i}\n{line}\n{' ' * (i-1)}^"
     # required for the conversion to RPN
     yield Token.RPAREN, None
 
 
 # precedence - map OP -> priority
 
-def convert_to_postfix(lexer, precendence=None):
+def convert_to_postfix(line, precendence=None):
     out = []
+    lexer = get_token(line)
     stack = deque()
     stack.append((Token.LPAREN, None))
     while stack:
@@ -73,16 +74,19 @@ def convert_to_postfix(lexer, precendence=None):
     return out
 
 
+def strtoken(token):
+    kind, val = token
+    if kind == Token.NUM:
+        return str(val)
+    else:
+        if val == operator.add:
+            return "+"
+        elif val == operator.mul:
+            return "*"
+
+
 def print_postfix(tokens):
-    for t in tokens:
-        if t[0] == Token.NUM:
-            print(t[1], end=' ')
-        else:
-            if t[1] == operator.add:
-                print("+", end=" ")
-            elif t[1] == operator.mul:
-                print("*", end=" ")
-    print()
+    print(" ".join(strtoken(t) for t in tokens))
 
 
 def eval_rpn(tokens):
@@ -101,12 +105,11 @@ def eval_rpn(tokens):
 
 def process(data):
     # part 1
-    acc = sum(eval_rpn(convert_to_postfix(get_token(l))) for l in data)
+    acc = sum(eval_rpn(convert_to_postfix(l)) for l in data)
     print("part 1:", acc)
     # part 2
     precendence = {operator.add: 1, operator.mul: 0}
-    acc = sum(eval_rpn(convert_to_postfix(get_token(l), precendence))
-              for l in data)
+    acc = sum(eval_rpn(convert_to_postfix(l, precendence)) for l in data)
     print("part 2:", acc)
 
 
