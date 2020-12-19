@@ -46,16 +46,17 @@ def process(data):
     print("part 2:", part2(data))
 
 
+def parse_rule(rule):
+    term, right = rule.split(": ")
+    if right[0] == '"':
+        target = right.strip('"')
+    else:
+        target = [list(part.split(" ")) for part in right.split(" | ")]
+    return term, target
+
+
 def parse_rules(rules):
-    rules_dict = dict()
-    for rule in rules.split("\n"):
-        start, end = rule.split(": ")
-        if end[0] == '"':
-            target = end.strip('"')
-        else:
-            target = [list(part.split(" ")) for part in end.split(" | ")]
-        rules_dict[start] = target
-    return rules_dict
+    return dict(parse_rule(rule) for rule in rules.split("\n"))
 
 
 def load_data(fileobj):
