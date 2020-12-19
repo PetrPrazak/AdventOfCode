@@ -31,8 +31,8 @@ def part2(data):
     rules["8"] = [['42', 'P']]
     rules["P"] = "+"
     # 11: 42{1}31{1} | ... | 42{x}31{x}
-    rule11 = []
-    for i in range(1, 6):  # upper limit found experimentally
+    rule11 = [['42', '31']]
+    for i in range(2, 6):  # upper limit found experimentally
         term = f"R{i}"
         rule11.append(['42', term, '31', term])
         rules[term] = f"{{{i}}}"
