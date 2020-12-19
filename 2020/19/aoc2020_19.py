@@ -10,10 +10,7 @@ def reduce_rules(rules, term="0"):
         for part in right:
             right_rules = (reduce_rules(rules, t) for t in part)
             out.append(''.join(right_rules))
-        if len(out) > 1:
-            return '(?:' + '|'.join(out) + ')'
-        else:
-            return out[0]
+        return '(?:' + '|'.join(out) + ')' if len(out) > 1 else out[0]
     else:
         return right
 
@@ -54,10 +51,10 @@ def parse_rules(rules):
     for rule in rules.split("\n"):
         start, end = rule.split(": ")
         if end[0] == '"':
-            rules_dict[start] = end.strip('"')
+            target = end.strip('"')
         else:
             target = [list(part.split(" ")) for part in end.split(" | ")]
-            rules_dict[start] = target
+        rules_dict[start] = target
     return rules_dict
 
 
