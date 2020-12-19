@@ -18,10 +18,14 @@ def reduce_rules(rules, term="0"):
         return right
 
 
+def count_matching(rules, lines):
+    reg = reduce_rules(rules)
+    return sum(bool(re.fullmatch(reg, line)) for line in lines)
+
+
 def part1(data):
     rules, data = data
-    reg = reduce_rules(rules)
-    return sum(bool(re.fullmatch(reg, line)) for line in data)
+    return count_matching(rules, data)
 
 
 def part2(data):
@@ -31,12 +35,12 @@ def part2(data):
     rules["P"] = "+"
     # 11: 42{1}31{1} | ... | 42{x}31{x}
     rule11 = []
-    for i in range(1, 7):
-        rule11.append(['42', f'R{i}', '31', f'R{i}'])
-        rules[f"R{i}"] = f"{{{i}}}"
+    for i in range(1, 6):  # upper limit found experimentally
+        term = f"R{i}"
+        rule11.append(['42', term, '31', term])
+        rules[term] = f"{{{i}}}"
     rules["11"] = rule11
-    reg = "^" + reduce_rules(rules) + "$"   # FCK!
-    return sum(bool(re.match(reg, line)) for line in data)
+    return count_matching(rules, data)
 
 
 def process(data):
