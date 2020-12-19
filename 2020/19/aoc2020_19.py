@@ -5,14 +5,10 @@ import re
 
 def reduce_rules(rules, term="0"):
     right = rules[term]
-    if type(right) is list:
-        out = []
-        for part in right:
-            right_rules = (reduce_rules(rules, t) for t in part)
-            out.append(''.join(right_rules))
-        return '(?:' + '|'.join(out) + ')' if len(out) > 1 else out[0]
-    else:
+    if type(right) is str:
         return right
+    out = [''.join(reduce_rules(rules, t) for t in part) for part in right]
+    return '(?:' + '|'.join(out) + ')' if len(out) > 1 else out[0]
 
 
 def count_matching(rules, lines):
@@ -20,30 +16,27 @@ def count_matching(rules, lines):
     return sum(bool(re.fullmatch(reg, line)) for line in lines)
 
 
-def part1(data):
-    rules, data = data
-    return count_matching(rules, data)
+def part1(rules, lines):
+    return count_matching(rules, lines)
 
 
-def part2(data):
-    # part 2
-    rules, data = data
+def part2(rules, lines):
+    # 8: (42)+
     rules["8"] = [['42', 'P']]
     rules["P"] = "+"
-    # 11: 42{1}31{1} | ... | 42{x}31{x}
+    # 11: 42 31 | 42{2} 31{2} | ... | 42{x}31{x}
     rule11 = [['42', '31']]
     for i in range(2, 6):  # upper limit found experimentally
         term = f"R{i}"
         rule11.append(['42', term, '31', term])
         rules[term] = f"{{{i}}}"
     rules["11"] = rule11
-    return count_matching(rules, data)
+    return count_matching(rules, lines)
 
 
 def process(data):
-    # part 1
-    print("part 1:", part1(data))
-    print("part 2:", part2(data))
+    print("part 1:", part1(*data))
+    print("part 2:", part2(*data))
 
 
 def parse_rule(rule):
