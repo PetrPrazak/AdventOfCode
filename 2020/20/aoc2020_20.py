@@ -1,11 +1,12 @@
 # https://adventofcode.com/2020/day/20
 from __future__ import print_function
-from collections import Counter, defaultdict
 from pprint import pprint
-import pathlib
+from pathlib import Path
+from collections import Counter, defaultdict
 from math import floor, sqrt, prod
 from copy import deepcopy
 from enum import IntEnum
+
 
 def transpose(matrix):
     return zip(*matrix)
@@ -30,12 +31,7 @@ def listmap(smap):
 def edge(row):
     return int(''.join('1' if p == '#' else '0' for p in row), 2)
 
-# Edge mapping:
-#     0
-#   +---+
-# 3 |   | 1
-#   +---+
-#     2
+
 class Edge(IntEnum):
     TOP = 0
     RIGHT = 1
@@ -75,7 +71,6 @@ def find_corners(edges):
     for states in edges.values():
         for state in states:
             c.update(state)
-    # pprint(c)
     margin_edges = set(n for n in c if c[n] == 4)
     corner_tiles = []
     for tile, states in edges.items():
@@ -108,13 +103,6 @@ def rec_delete(tiles_order, idx, key):
         del tiles_order[idx][key]
 
 
-def side_edges(edges, order, connecting_edges, idx, side_a, side_b):
-    l = list(order[idx].keys())
-    tile, variant = l[0]
-    tile_edges = edges[tile][variant]
-    return tile_edges[side_a] in connecting_edges or tile_edges[side_b] in connecting_edges
-
-
 def build_candidates(edges, width, corner_tiles):
     tiles_order = [defaultdict(list) for _ in range(len(edges))]
     tiles_order[0] = {c: [] for c in corner_tiles}
@@ -127,28 +115,36 @@ def build_candidates(edges, width, corner_tiles):
                 _, right, bottom, _ = edges[tile][edges_index]
                 # looking tile to match right side on the left
                 if x < width - 1:
-                    possible_tiles = list(find_tiles(edges, tile, right, Edge.LEFT))
-                    if possible_tiles:
-                        for p in possible_tiles:
-                            # backlink
-                            l = tiles_order[tile_index(width, x + 1, y)][p]
-                            l.append((idx, tile_variant))
-                    else:
+                    found = False
+                    for p in find_tiles(edges, tile, right, Edge.LEFT):
+                        found = True
+                        # backlink
+                        l = tiles_order[tile_index(width, x + 1, y)][p]
+                        l.append((idx, tile_variant))
+                    if not found:
                         del_keys.append(tile_variant)
 
+                # looking tile to match bottom side on the top
                 if y < width - 1:
-                    # looking tile to match bottom side on the top
-                    possible_tiles = list(find_tiles(edges, tile, bottom, Edge.TOP))
-                    if possible_tiles:
-                        for p in possible_tiles:
-                            l = tiles_order[tile_index(width, x, y + 1)][p]
-                            l.append((idx, tile_variant))
-                    else:
+                    found = False
+                    for p in find_tiles(edges, tile, bottom, Edge.TOP):
+                        found = True
+                        l = tiles_order[tile_index(width, x, y + 1)][p]
+                        l.append((idx, tile_variant))
+                    if not found:
                         del_keys.append(tile_variant)
 
             for k in del_keys:
                 rec_delete(tiles_order, idx, k)
     return tiles_order
+
+
+def side_edges(edges, order, connecting_edges, idx, side_a, side_b):
+    l = list(order[idx].keys())
+    tile, variant = l[0]
+    tile_edges = edges[tile][variant]
+    return (tile_edges[side_a] not in connecting_edges
+            and tile_edges[side_b] not in connecting_edges)
 
 
 def check_corners(edges, order, width):
@@ -163,11 +159,15 @@ def check_corners(edges, order, width):
             tile_edges = edges[tile][variant]
             connecting_edges.add(tile_edges[Edge.BOTTOM])
             connecting_edges.add(tile_edges[Edge.RIGHT])
-    return not any(
-        [side_edges(edges, order, connecting_edges,       0, Edge.TOP, Edge.LEFT),
-         side_edges(edges, order, connecting_edges, width-1, Edge.TOP, Edge.RIGHT),
-         side_edges(edges, order, connecting_edges,  -width, Edge.BOTTOM, Edge.LEFT),
-         side_edges(edges, order, connecting_edges,      -1, Edge.BOTTOM, Edge.RIGHT)])
+
+    def check(idx, edge1, edge2):
+        return side_edges(edges, order, connecting_edges, idx, edge1, edge2)
+
+    return all(
+        [check(0,       Edge.TOP,    Edge.LEFT),
+         check(width-1, Edge.TOP,    Edge.RIGHT),
+         check(-width,  Edge.BOTTOM, Edge.LEFT),
+         check(-1,      Edge.BOTTOM, Edge.RIGHT)])
 
 
 def eliminate(edges, tiles_order, width):
@@ -282,7 +282,7 @@ def load_data(fileobj):
 
 def main(file="input.txt"):
     print(file)
-    with pathlib.Path(__file__).parent.joinpath(file).open() as f:
+    with Path(__file__).parent.joinpath(file).open() as f:
         process(load_data(f))
 
 
