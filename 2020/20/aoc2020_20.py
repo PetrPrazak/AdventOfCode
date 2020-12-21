@@ -5,7 +5,7 @@ from pprint import pprint
 import pathlib
 from math import floor, sqrt, prod
 from copy import deepcopy
-
+from enum import IntEnum
 
 def transpose(matrix):
     return zip(*matrix)
@@ -29,6 +29,18 @@ def listmap(smap):
 
 def edge(row):
     return int(''.join('1' if p == '#' else '0' for p in row), 2)
+
+# Edge mapping:
+#     0
+#   +---+
+# 3 |   | 1
+#   +---+
+#     2
+class Edge(IntEnum):
+    TOP = 0
+    RIGHT = 1
+    BOTTOM = 2
+    LEFT = 3
 
 
 def edges(tile):
@@ -72,13 +84,6 @@ def find_corners(edges):
                 corner_tiles.append((tile, i))
     return corner_tiles
 
-# Edge mapping:
-#     0
-#   +---+
-# 1 |   | 3
-#   +---+
-#     2
-
 
 def find_tiles(edges, exclude, value, edge):
     """ finds tiles that have a certain value on requested edge.
@@ -119,10 +124,10 @@ def build_candidates(edges, width, corner_tiles):
             del_keys = []
             for tile_variant in tiles_order[idx]:
                 tile, edges_index = tile_variant
-                _, _, bottom, right = edges[tile][edges_index]
+                _, right, bottom, _ = edges[tile][edges_index]
                 # looking tile to match right side on the left
                 if x < width - 1:
-                    possible_tiles = list(find_tiles(edges, tile, right, 1))
+                    possible_tiles = list(find_tiles(edges, tile, right, Edge.LEFT))
                     if possible_tiles:
                         for p in possible_tiles:
                             # backlink
@@ -133,7 +138,7 @@ def build_candidates(edges, width, corner_tiles):
 
                 if y < width - 1:
                     # looking tile to match bottom side on the top
-                    possible_tiles = list(find_tiles(edges, tile, bottom, 0))
+                    possible_tiles = list(find_tiles(edges, tile, bottom, Edge.TOP))
                     if possible_tiles:
                         for p in possible_tiles:
                             l = tiles_order[tile_index(width, x, y + 1)][p]
@@ -156,13 +161,13 @@ def check_corners(edges, order, width):
                 return False
             tile, variant = l[0]
             tile_edges = edges[tile][variant]
-            connecting_edges.add(tile_edges[2])  # bottom
-            connecting_edges.add(tile_edges[3])  # right
+            connecting_edges.add(tile_edges[Edge.BOTTOM])
+            connecting_edges.add(tile_edges[Edge.RIGHT])
     return not any(
-        [side_edges(edges, order, connecting_edges,       0, 0, 1),
-         side_edges(edges, order, connecting_edges, width-1, 0, 3),
-         side_edges(edges, order, connecting_edges,  -width, 2, 1),
-         side_edges(edges, order, connecting_edges,      -1, 2, 3)])
+        [side_edges(edges, order, connecting_edges,       0, Edge.TOP, Edge.LEFT),
+         side_edges(edges, order, connecting_edges, width-1, Edge.TOP, Edge.RIGHT),
+         side_edges(edges, order, connecting_edges,  -width, Edge.BOTTOM, Edge.LEFT),
+         side_edges(edges, order, connecting_edges,      -1, Edge.BOTTOM, Edge.RIGHT)])
 
 
 def eliminate(edges, tiles_order, width):
@@ -191,8 +196,7 @@ def make_image(tiles, order, width):
         for x in range(width):
             idx = tile_index(width, x, y)
             tile, variant = order[idx]
-            # for some reason the images are all flipped :confused:
-            for r, line in enumerate(tiles[tile][(variant-4) % 8]):
+            for r, line in enumerate(tiles[tile][variant]):
                 rows[row + r].extend(line)
     return strmap(rows)
 
