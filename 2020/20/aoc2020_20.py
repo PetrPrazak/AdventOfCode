@@ -139,37 +139,6 @@ def build_candidates(edges, width, corner_tiles):
     return tiles_order
 
 
-def side_edges(edges, order, connecting_edges, idx, side_a, side_b):
-    l = list(order[idx].keys())
-    tile, variant = l[0]
-    tile_edges = edges[tile][variant]
-    return (tile_edges[side_a] not in connecting_edges
-            and tile_edges[side_b] not in connecting_edges)
-
-
-def check_corners(edges, order, width):
-    connecting_edges = set()
-    for y in range(width-1):
-        for x in range(width-1):
-            idx = tile_index(width, x, y)
-            l = list(order[idx].keys())
-            if not l or len(l) > 1:
-                return False
-            tile, variant = l[0]
-            tile_edges = edges[tile][variant]
-            connecting_edges.add(tile_edges[Edge.BOTTOM])
-            connecting_edges.add(tile_edges[Edge.RIGHT])
-
-    def check(idx, edge1, edge2):
-        return side_edges(edges, order, connecting_edges, idx, edge1, edge2)
-
-    return all(
-        [check(0,       Edge.TOP,    Edge.LEFT),
-         check(width-1, Edge.TOP,    Edge.RIGHT),
-         check(-width,  Edge.BOTTOM, Edge.LEFT),
-         check(-1,      Edge.BOTTOM, Edge.RIGHT)])
-
-
 def eliminate(edges, tiles_order, width):
     # eliminate from botttom up
     for tile in tiles_order[-1]:  # will be only one
@@ -178,10 +147,7 @@ def eliminate(edges, tiles_order, width):
         keys.remove(tile)
         for k in keys:
             rec_delete(test_order, -1, k)
-        if check_corners(edges, test_order, width):
-            return test_order
-        break
-    return None
+        return test_order
 
 
 def normalize(order):
