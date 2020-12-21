@@ -1,16 +1,10 @@
 # https://adventofcode.com/2020/day/20
 from __future__ import print_function
-from functools import reduce
-from operator import mul
-from collections import Counter, defaultdict, deque
+from collections import Counter, defaultdict
 from pprint import pprint
-import re
 import pathlib
-import typing
-import itertools
-from math import floor, sqrt
-from functools import cache
-
+from math import floor, sqrt, prod
+from copy import deepcopy
 
 
 def transpose(matrix):
@@ -23,6 +17,14 @@ def rotate_tile(tile):
 
 def flip_tile(tile):
     return [''.join(reversed(l)) for l in tile]
+
+
+def strmap(lmap):
+    return [''.join(row) for row in lmap]
+
+
+def listmap(smap):
+    return [list(row) for row in smap]
 
 
 def edge(row):
@@ -38,7 +40,11 @@ def edges(tile):
     return [top, right, down, left]
 
 
-def rotate_tiles(tiles):
+def remove_borders(tile):
+    return [line[1:-1] for line in tile[1:-1]]
+
+
+def make_all_tiles(tiles):
     all_tiles = dict()
     all_edges = dict()
     for id, tile in tiles.items():
@@ -48,60 +54,214 @@ def rotate_tiles(tiles):
             variants.append(tile)
         variants.extend([flip_tile(tile) for tile in variants])
         all_edges[id] = [edges(tile) for tile in variants]
-        all_tiles[id] = variants
+        all_tiles[id] = [remove_borders(tile) for tile in variants]
     return all_edges, all_tiles
 
 
-def get_rows(tile_order, states, width):
-    return (tuple(itertools.islice(zip(tile_order, states), width * n, width * (n+1))) for n in range(width))
+def find_corners(edges):
+    c = Counter()
+    for states in edges.values():
+        for state in states:
+            c.update(state)
+    # pprint(c)
+    margin_edges = set(n for n in c if c[n] == 4)
+    corner_tiles = []
+    for tile, states in edges.items():
+        for i, state in enumerate(states):
+            if sum(bool(x in margin_edges) for x in state) == 2:
+                corner_tiles.append((tile, i))
+    return corner_tiles
+
+# Edge mapping:
+#     0
+#   +---+
+# 1 |   | 3
+#   +---+
+#     2
 
 
-def check_tiles(tiles, width, tile_order, states):
-    @cache
-    def compare_horizontally(left, lidx, right, ridx):
-        return tiles[left][lidx][3] == tiles[right][ridx][1]
+def find_tiles(edges, exclude, value, edge):
+    """ finds tiles that have a certain value on requested edge.
+    returns tile id and the state index
+    """
+    for tile, states in edges.items():
+        if tile == exclude:
+            continue
+        for i, state in enumerate(states):
+            if state[edge] == value:
+                yield tile, i
 
-    @cache
-    def compare_vertically(top, top_idx, down, down_idx):
-        return tiles[top][top_idx][2] == tiles[down][down_idx][0]
 
-    for row in get_rows(tile_order, states, width):
-        for left, right in zip(row, row[1:]):
-            if not compare_horizontally(*left, *right):
+def tile_index(width, x, y):
+    return y * width + x
+
+
+def rec_delete(tiles_order, idx, key):
+    if key in tiles_order[idx]:
+        for pos, tile_variant in tiles_order[idx][key]:
+            rec_delete(tiles_order, pos, tile_variant)
+        del tiles_order[idx][key]
+
+
+def side_edges(edges, order, connecting_edges, idx, side_a, side_b):
+    l = list(order[idx].keys())
+    tile, variant = l[0]
+    tile_edges = edges[tile][variant]
+    return tile_edges[side_a] in connecting_edges or tile_edges[side_b] in connecting_edges
+
+
+def build_candidates(edges, width, corner_tiles):
+    tiles_order = [defaultdict(list) for _ in range(len(edges))]
+    tiles_order[0] = {c: [] for c in corner_tiles}
+    for y in range(width):
+        for x in range(width):  # try to connect the first row
+            idx = tile_index(width, x, y)
+            del_keys = []
+            for tile_variant in tiles_order[idx]:
+                tile, edges_index = tile_variant
+                _, _, bottom, right = edges[tile][edges_index]
+                # looking tile to match right side on the left
+                if x < width - 1:
+                    possible_tiles = list(find_tiles(edges, tile, right, 1))
+                    if possible_tiles:
+                        for p in possible_tiles:
+                            # backlink
+                            l = tiles_order[tile_index(width, x + 1, y)][p]
+                            l.append((idx, tile_variant))
+                    else:
+                        del_keys.append(tile_variant)
+
+                if y < width - 1:
+                    # looking tile to match bottom side on the top
+                    possible_tiles = list(find_tiles(edges, tile, bottom, 0))
+                    if possible_tiles:
+                        for p in possible_tiles:
+                            l = tiles_order[tile_index(width, x, y + 1)][p]
+                            l.append((idx, tile_variant))
+                    else:
+                        del_keys.append(tile_variant)
+
+            for k in del_keys:
+                rec_delete(tiles_order, idx, k)
+    return tiles_order
+
+
+def check_corners(edges, order, width):
+    connecting_edges = set()
+    for y in range(width-1):
+        for x in range(width-1):
+            idx = tile_index(width, x, y)
+            l = list(order[idx].keys())
+            if not l or len(l) > 1:
                 return False
-    for row in transpose(get_rows(tile_order, states, width)):
-        for top, down in zip(row, row[1:]):
-            if not compare_vertically(*top, *down):
-                return False
-    return True
+            tile, variant = l[0]
+            tile_edges = edges[tile][variant]
+            connecting_edges.add(tile_edges[2])  # bottom
+            connecting_edges.add(tile_edges[3])  # right
+    return not any(
+        [side_edges(edges, order, connecting_edges,       0, 0, 1),
+         side_edges(edges, order, connecting_edges, width-1, 0, 3),
+         side_edges(edges, order, connecting_edges,  -width, 2, 1),
+         side_edges(edges, order, connecting_edges,      -1, 2, 3)])
 
 
-def try_combination(tiles, width, tile_order):
-    for states in itertools.combinations_with_replacement(range(8), len(tile_order)):
-        if check_tiles(tiles, width, tile_order, states):
-            return True
-    return False
+def eliminate(edges, tiles_order, width):
+    # eliminate from botttom up
+    for tile in tiles_order[-1]:  # will be only one
+        test_order = deepcopy(tiles_order)
+        keys = list(test_order[-1].keys())
+        keys.remove(tile)
+        for k in keys:
+            rec_delete(test_order, -1, k)
+        if check_corners(edges, test_order, width):
+            return test_order
+        break
+    return None
 
 
-def try_all_combinations(tiles):
-    width = floor(sqrt(len(tiles)))
-    print("Width:", width)
-    for idx, position in enumerate(itertools.permutations(tiles.keys())):
-        if idx % 20 == 0: print(idx)
-        if try_combination(tiles, width, position):
-            return position
+def normalize(order):
+    return [list(s.keys())[0] for s in order]
+
+
+def make_image(tiles, order, width):
+    tile_size = 8
+    rows = [[] for _ in range(width * tile_size)]
+    for y in range(width):
+        row = y * tile_size
+        for x in range(width):
+            idx = tile_index(width, x, y)
+            tile, variant = order[idx]
+            # for some reason the images are all flipped :confused:
+            for r, line in enumerate(tiles[tile][(variant-4) % 8]):
+                rows[row + r].extend(line)
+    return strmap(rows)
+
+
+monster = [
+    "                  # ",
+    "#    ##    ##    ###",
+    " #  #  #  #  #  #   ",
+]
+
+
+def make_monster_pattern():
+    return [(x, y) for y, row in enumerate(monster)
+            for x, c in enumerate(row) if c == '#']
+
+
+def mask_pattern(smap, pattern):
+    amap = listmap(smap)
+    height = len(amap)
+    width = len(amap[0])
+    max_y = max(pattern, key=lambda t: t[1])[1]
+    max_x = max(pattern)[0]
+    found = False
+    for y in range(height - max_y):
+        for x in range(width-max_x):
+            if all(amap[y+py][x + px] == '#' for px, py in pattern):
+                found = True
+                for px, py in pattern:
+                    amap[y+py][x + px] = 'O'
+    return found, amap
+
+
+def find_pattern(smap, pattern):
+    for _ in range(4):
+        found, amap = mask_pattern(smap, pattern)
+        if found:
+            return strmap(amap)
+        smap = flip_tile(smap)
+        found, amap = mask_pattern(smap, pattern)
+        if found:
+            return strmap(amap)
+        smap = flip_tile(smap)
+        smap = rotate_tile(smap)
     return None
 
 
 def process(data):
-    edges, tiles = rotate_tiles(data)
-    r = try_all_combinations(edges)
-    pprint(r)
+    edges, tiles = make_all_tiles(data)
     # part 1
-    result = 0
+    corner_tiles = find_corners(edges)
+    result = prod(set(val for val, _ in corner_tiles))
     print("part 1:", result)
+
     # part 2
-    result = 0
+    width = floor(sqrt(len(edges)))
+    tiles_order = build_candidates(edges, width, corner_tiles)
+    correct_order = eliminate(edges, tiles_order, width)
+    correct_order = normalize(correct_order)
+
+    whole_map = make_image(tiles, correct_order, width)
+    if found := find_pattern(whole_map, make_monster_pattern()):
+        whole_map = found
+    else:
+        print("Not found")
+
+    ctr = Counter()
+    for row in whole_map:
+        ctr.update(row)
+    result = ctr['#']
     print("part 2:", result)
 
 
@@ -124,4 +284,4 @@ def main(file="input.txt"):
 
 if __name__ == "__main__":
     main("test.txt")
-    # main()
+    main()
