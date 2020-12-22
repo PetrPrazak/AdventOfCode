@@ -1,7 +1,7 @@
 # https://adventofcode.com/2020/day/22
 from __future__ import print_function
 from collections import deque
-from copy import copy, deepcopy
+from copy import deepcopy
 from itertools import islice
 
 def add_cards(deck, winning, losing):
@@ -23,23 +23,13 @@ def copy_deck(deck, length):
     return deque(islice(deck, 0, length))
 
 
-def compare_decks(deck1, deck2):
-    return set(deck1) == set(deck2)
-
-
-def repeated(prev_games, deck1, deck2):
-    for prev_deck1, prev_deck2 in prev_games:
-        if compare_decks(deck1, prev_deck1) and compare_decks(deck2, prev_deck2):
-            return True
-    return False
-
-
 def rec_play(deck1, deck2, level=0):
-    prev_games = []
+    prev_games = set()
     while deck1 and deck2:
-        if repeated(prev_games, deck1, deck2):
+        state = tuple(deck1), tuple(deck2)
+        if state in prev_games:
             break
-        prev_games.append((copy(deck1), copy(deck2)))
+        prev_games.add(state)
 
         card1, card2 = deck1.popleft(), deck2.popleft()
         if card1 <= len(deck1) and card2 <= len(deck2):
