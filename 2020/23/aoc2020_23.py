@@ -3,7 +3,6 @@ from __future__ import print_function
 from pprint import pprint
 from pathlib import Path
 from time import time
-from array import array
 
 
 def game(cups, max_cup):
@@ -30,7 +29,7 @@ def cycle(cups, max_cups, max_cycles=100):
 
 def init_cups(data):
     first, last = data[0], data[-1]
-    cups = array('L', [0] * (len(data)+1))
+    cups = [0] * (len(data)+1)
     cups[0] = first
     for n, suc in zip(data, data[1:]):
         cups[n] = suc
