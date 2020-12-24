@@ -6,22 +6,19 @@ from itertools import product
 
 # https://www.redblobgames.com/grids/hexagons/
 
+DIFFS = { "e": (1, -1, 0),
+          "w": (-1, 1, 0),
+         "nw": ( 0, 1,-1),
+         "se": ( 0,-1, 1),
+         "ne": ( 1, 0,-1),
+         "sw": (-1, 0, 1)}
+
 
 def gridwalk(steps):
     x, y, z = 0, 0, 0
     for s in steps:
-        if s == 'e' or s == 'w':
-            inc = 1 if s == 'w' else -1
-            x -= inc
-            y += inc
-        elif s == 'ne' or s == 'sw':
-            inc = 1 if s == 'ne' else -1
-            x += inc
-            z -= inc
-        elif s == 'se' or s == 'nw':
-            inc = 1 if s == 'se' else -1
-            y -= inc
-            z += inc
+        dx, dy, dz = DIFFS[s]
+        x, y, z = x + dx, y + dy, z + dz
     return x, y, z
 
 
@@ -36,22 +33,26 @@ def sum_neighbors(blacks, pos):
     return sum(bool((x+dx, y+dy, z+dz) in blacks) for dx, dy, dz in neighbors)
 
 
-def get_new_color(colors, pos, val):
+def turn_to_black(colors, pos, is_black):
     num_blacks = sum_neighbors(colors, pos)
-    if not val and num_blacks == 2:
-        val = True
-    elif val and (num_blacks == 0 or num_blacks > 2):
-        val = False
-    return val
+    if not is_black and num_blacks == 2:
+        is_black = True
+    elif is_black and (num_blacks == 0 or num_blacks > 2):
+        is_black = False
+    return is_black
+
+
+def get_all_neighbors(pos):
+    x, y, z = pos
+    for dx, dy, dz in all_tiles:
+        yield x+dx, y+dy, z+dz
 
 
 def new_blacks(blacks):
     newblacks = set()
     for pos in blacks:
-        x, y, z = pos
-        for dx, dy, dz in all_tiles:
-            newpos = x+dx, y+dy, z+dz
-            if get_new_color(blacks, newpos, newpos in blacks):
+        for newpos in get_all_neighbors(pos):
+            if turn_to_black(blacks, newpos, newpos in blacks):
                 newblacks.add(newpos)
     return newblacks
 
@@ -67,10 +68,7 @@ def process(data):
     blacks = set()
     for line in data:
         pos = gridwalk(line)
-        if pos in blacks:
-            blacks.remove(pos)
-        else:
-            blacks.add(pos)
+        blacks ^= {pos}
     result = len(blacks)
     print("part 1:", result)
     # part 2
@@ -80,19 +78,11 @@ def process(data):
 
 
 def parse_line(line):
-    out = []
-    it = iter(line)
-    for c in it:
-        if c == 'w' or c == 'e':
-            out.append(c)
-        else:
-            d = next(it)
-            out.append(c + d)
-    return out
+    return line.replace("e", "e ").replace("w", "w ").rstrip().split(" ")
 
 
 def load_data(fileobj):
-    return [parse_line(line.rstrip()) for line in fileobj]
+    return [parse_line(line) for line in fileobj]
 
 
 def main(file="input.txt"):
