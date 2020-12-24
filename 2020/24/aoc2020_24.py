@@ -25,9 +25,9 @@ def gridwalk(steps):
     return x, y, z
 
 
-neighbors = [(x, y, z) for x, y, z in product([-1, 0, 1], repeat=3)
+all_tiles = [(x, y, z) for x, y, z in product([-1, 0, 1], repeat=3)
              if x+y+z == 0]
-all_tiles = neighbors[:]
+neighbors = all_tiles[:]
 neighbors.remove((0, 0, 0))
 
 
@@ -45,7 +45,7 @@ def get_new_color(colors, pos, val):
     return val
 
 
-def new_colors(blacks):
+def new_blacks(blacks):
     newblacks = set()
     for pos in blacks:
         x, y, z = pos
@@ -58,7 +58,7 @@ def new_colors(blacks):
 
 def cycle(blacks, n=1):
     for _ in range(n):
-        blacks = new_colors(blacks)
+        blacks = new_blacks(blacks)
     return blacks
 
 
