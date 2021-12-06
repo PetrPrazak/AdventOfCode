@@ -3,7 +3,7 @@ from __future__ import print_function
 from pprint import pprint
 from pathlib import Path
 from copy import copy
-
+from collections import Counter
 
 def explode_fish(fish, cnt):
     """ stupid brute-force method """
@@ -20,16 +20,14 @@ def explode_fish(fish, cnt):
 
 
 def count_fish(fish, cnt):
-    """ just count fishes of each iteration separately """
-    growth = [0] * 9  # each fish can have iteration from 0 to 8
-    for f in fish:
-        growth[f] += 1
-
+    """ just count fishes of each generation separately """
+    # each fish can have iteration from 0 to 8
+    gens = Counter(fish)
+    growth = [gens[i] for i in range(9)]
     for r in range(cnt):
-        spawn = growth[0]  # how many are spawning in this iteration
-        # shift generation, add newborn with iteration 8
-        growth = growth[1:] + [spawn]
-        growth[6] += spawn  # the spawning fish go to 6 again
+        # shift generation, add spawning fish (gen 0) as generation 8
+        growth = growth[1:] + growth[:1]
+        growth[6] += growth[8]  # the spawning fish go to generation 6 again
     return sum(growth)
 
 
