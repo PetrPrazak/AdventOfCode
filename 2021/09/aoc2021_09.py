@@ -5,36 +5,31 @@ from pathlib import Path
 from math import prod
 
 
-def neighbors4(point):
+def neighbors4(grid, point):
     """The four neighbors (without diagonals)."""
     x, y = point
-    return (x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)
+    return filter(lambda p: p in grid, ((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)))
 
 
 def make_grid(data):
-    grid = dict()
-    for y in range(len(data)):
-        for x in range(len(data[0])):
-            grid[(x, y)] = data[y][x]
-    return grid
+    return {(x, y): data[y][x] for x in range(len(data[0])) for y in range(len(data))}
 
 
 def get_low_points(grid):
     for coord, point in grid.items():
-        if all(n not in grid or point < grid[n] for n in neighbors4(coord)):
+        if all(point < grid[n] for n in neighbors4(grid, coord)):
             yield coord, point
 
 
-def get_basin(grid, point, level=None, visits=None):
+def get_basin(grid, point, visits=None):
     if visits is None:
         visits = set()
-    if point not in grid or point in visits:
+    elif point in visits:
         return 0
     visits.add(point)
-    val = grid[point]
-    if val == 9:
+    if grid[point] == 9:
         return 0
-    return 1 + sum(get_basin(grid, p, val, visits) for p in neighbors4(point))
+    return 1 + sum(get_basin(grid, p, visits) for p in neighbors4(grid, point))
 
 
 def process(data):
@@ -44,8 +39,8 @@ def process(data):
     result = sum(level+1 for _, level in low_points)
     print("part 1:", result)
     # part 2
-    basins = sorted([get_basin(grid, coord) for coord, _ in low_points], reverse=True)
-    result = prod(basins[:3])
+    basins = sorted([get_basin(grid, coord) for coord, _ in low_points])
+    result = prod(basins[-3:])
     print("part 2:", result)
 
 
