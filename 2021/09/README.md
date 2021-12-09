@@ -41,7 +41,11 @@ The **size** of a basin is the number of locations within the basin, including t
 The top-left basin, size `3`:
 
 ```
-**`21`**99943210 **3**987894921 9856789892 8767896789 9899965678
+2199943210
+3987894921
+9856789892
+8767896789
+9899965678
 ```
 The top-right basin, size `9`:
 
