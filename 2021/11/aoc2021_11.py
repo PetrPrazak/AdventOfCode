@@ -17,29 +17,34 @@ def neighbors8(point):
 
 
 def simulate(grid):
-    def check_flash(grid, point):
-        if grid[point] > 9:
-            grid[point] = 0
-            for n in neighbors8(point):
-                if n in grid and grid[n]:
-                    grid[n] += 1
-                    check_flash(grid, n)
     while True:
         for point in grid:
             grid[point] += 1
-        for point in grid:
-            check_flash(grid, point)
-        yield sum(v == 0 for v in grid.values())
+
+        flashed = set()
+        to_flash = { point for point, level in grid.items() if level > 9 }
+        while to_flash:
+            flashed.update(to_flash)
+            for point in to_flash:
+                for n in neighbors8(point):
+                    if n in grid:
+                        grid[n] += 1
+            to_flash = { point for point, level in grid.items() if level > 9 and point not in flashed }
+
+        for point in flashed:
+            grid[point] = 0
+        yield len(flashed)
 
 
 def process(data):
     # part 1
     grid = make_grid(data)
+    size = len(grid)
     result = sum(islice(simulate(grid), 100))
     print("part 1:", result)
     # part 2
-    grid = make_grid(data)
-    *_, step = takewhile(lambda r: r[0] != 100, zip(simulate(grid), count(1)))
+    # assume it happens after 100 cycles
+    *_, step = takewhile(lambda r: r[0] != size, zip(simulate(grid), count(101)))
     result = step[1] + 1  # the last pair is not returned
     print("part 2:", result)
 
