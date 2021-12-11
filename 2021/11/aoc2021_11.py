@@ -2,7 +2,7 @@
 from __future__ import print_function
 from pprint import pprint
 from pathlib import Path
-from itertools import count, takewhile
+from itertools import count, takewhile, islice
 
 
 def make_grid(data):
@@ -35,7 +35,7 @@ def simulate(grid):
 def process(data):
     # part 1
     grid = make_grid(data)
-    result = sum(map(lambda r: r[0], zip(simulate(grid), range(100))))
+    result = sum(islice(simulate(grid), 100))
     print("part 1:", result)
     # part 2
     grid = make_grid(data)
