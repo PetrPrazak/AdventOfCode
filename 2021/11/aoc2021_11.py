@@ -2,7 +2,7 @@
 from __future__ import print_function
 from pprint import pprint
 from pathlib import Path
-from itertools import count
+from itertools import count, takewhile
 
 
 def make_grid(data):
@@ -24,27 +24,24 @@ def simulate(grid):
                 if n in grid and grid[n]:
                     grid[n] += 1
                     check_flash(grid, n)
-    for point in grid:
-        grid[point] += 1
-    for point in grid:
-        check_flash(grid, point)
-    return sum(v == 0 for v in grid.values())
+    while True:
+        for point in grid:
+            grid[point] += 1
+        for point in grid:
+            check_flash(grid, point)
+        yield sum(v == 0 for v in grid.values())
 
 
 def process(data):
     # part 1
     grid = make_grid(data)
-    result = sum(simulate(grid) for _ in range(100))
+    result = sum(map(lambda r: r[0], zip(simulate(grid), range(100))))
     print("part 1:", result)
     # part 2
     grid = make_grid(data)
-    s = count(iter(simulate(grid), 100))
-    step = 0
-    while True:
-        step += 1
-        if simulate(grid) == 100:
-            break
-    print("part 2:", step)
+    *_, step = takewhile(lambda r: r[0] != 100, zip(simulate(grid), count(1)))
+    result = step[1] + 1  # the last pair is not returned
+    print("part 2:", result)
 
 
 def load_data(fileobj):
