@@ -4,28 +4,32 @@ from pprint import pprint
 from pathlib import Path
 from operator import itemgetter
 
-def render_grid(coords, dim):
+
+def render_grid(coords, dim, on = '*', off = ' '):
     out = ""
-    for line in range(dim[1] + 1):
-        for col in range(dim[0] + 1):
-            out += '*' if (col, line) in coords else ' '
+    for y in range(dim[1] + 1):
+        for x in range(dim[0] + 1):
+            out += on if (x, y) in coords else off
         out += '\n'
     return out
+
+
+def tuple_part(t, part, val):
+    """ returns the original tuple with specific part replaced """
+    tuple_list = list(t)
+    tuple_list[part] = val
+    return tuple(tuple_list)
 
 
 def fold_grid(coords, dimension, axis, fold):
     def translate(val, new_high, fold):
         return new_high - abs(val - fold)
-    def tuple_part(t, part, val):
-        return (t[0], val) if part == 1 else (val, t[1])
 
     part = 0 if axis == 'x' else 1
     high = dimension[part]
     new_high = max(high - fold, fold)
-    new_coords = set()
-    for coord in coords:
-        offset = translate(coord[part], new_high, fold)
-        new_coords.add(tuple_part(coord, part, offset))
+    new_coords = {tuple_part(coord, part, translate(coord[part], new_high, fold))
+                  for coord in coords}
     dimension = tuple_part(dimension, part, new_high - 1)
     return new_coords, dimension
 
