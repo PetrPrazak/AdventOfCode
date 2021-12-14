@@ -2,6 +2,7 @@
 from __future__ import print_function
 from pathlib import Path
 from functools import cache
+from collections import Counter
 
 
 def merge_counter(list1, list2):
@@ -33,24 +34,35 @@ def count_molecules(polymer, rules, iterations):
         pair = polymer[idx:idx+2]
         counter = merge_counter(counter, expand_pair(pair, iterations))
     inc_counter(counter, polymer[-1])
-    return counter
-
-
-def get_diff(counter):
     sums = sorted(counter, reverse=True)
     return sums[0] - sums[-1]
+
+
+# non-recursive solution from
+# https://www.reddit.com/r/adventofcode/comments/rfzq6f/comment/hohwj4f/?utm_source=share&utm_medium=web2x&context=3
+def buildPolymer(polymer, rules, iterations):
+    freq = Counter([a+b for a, b in list(zip(polymer, polymer[1:]))])
+    for _ in range(iterations):
+        freq = sum(
+            [Counter({p[0] + rules[p]:freq[p], rules[p] + p[1]:freq[p]})
+             for p in freq],
+            Counter()
+        )
+    freq = (
+        Counter({polymer[-1]: 1}) +
+        sum([Counter({p[0]:freq[p]}) for p in freq], Counter())
+    )
+    sums = freq.most_common()
+    return sums[0][1] - sums[-1][1]
 
 
 def process(data):
     # part 1
     polymer, rules = data
-    counter = count_molecules(*data, 10)
-    result = get_diff(counter)
-    print("part 1:", result)
+    print("part 1:", count_molecules(*data, 10))
     # part 2
-    counter = count_molecules(*data, 40)
-    result = get_diff(counter)
-    print("part 2:", result)
+    print("part 2:", count_molecules(*data, 40))
+    print("part 2:", buildPolymer(*data, 40))
 
 
 def parse_recipes(recipes):
