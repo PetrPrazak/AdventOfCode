@@ -1,7 +1,20 @@
 # https://adventofcode.com/2021/day/15
 from __future__ import print_function
+import time
 from pathlib import Path
 from heapq import heappush, heappop
+from functools import wraps
+
+
+def timeit(method):
+    @wraps(method)
+    def timed(*args, **kw):
+        ts = time.time()
+        result = method(*args, **kw)
+        te = time.time()
+        print(f'{method.__name__} {(te - ts) * 1000:2.2f} ms')
+        return result
+    return timed
 
 
 def neighbors4(point):
@@ -13,21 +26,19 @@ def neighbors4(point):
 def dijkstra(start_vertex, value_f, moves_f):
     D = {start_vertex: 0}
     pq = [(0, start_vertex)]
-    visited = set()
     while pq:
-        _, current_vertex = heappop(pq)
-        visited.add(current_vertex)
-        for neighbor in moves_f(current_vertex):
-            distance = value_f(neighbor)
-            if neighbor not in visited:
+        total, current_vertex = heappop(pq)
+        if total <= D[current_vertex]:
+            for neighbor in moves_f(current_vertex):
                 old_cost = D.get(neighbor, float('inf'))
-                new_cost = D[current_vertex] + distance
+                new_cost = total + value_f(neighbor)
                 if new_cost < old_cost:
                     heappush(pq, (new_cost, neighbor))
                     D[neighbor] = new_cost
     return D
 
 
+@timeit
 def get_lowest_path(data, part=1):
     def in_bounds(x, y):
         return x in range(size[0]) and y in range(size[1])
@@ -43,11 +54,12 @@ def get_lowest_path(data, part=1):
         add_x, x = divmod(x, max_x)
         add_y, y = divmod(y, max_y)
         val = data[y][x] + add_x + add_y
-        while val > 9: val -= 9
+        val = (val - 1) % 9 + 1
         return val
 
+    scale = 5 if part == 2 else 1
     max_x, max_y = len(data[0]), len(data)
-    size = (max_x * 5, max_y * 5) if part == 2 else (max_x, max_y)
+    size = (max_x * scale, max_y * scale)
     end_node = size[0] - 1, size[1] - 1
     r = dijkstra((0,0), value, moves)
     return r[end_node]
