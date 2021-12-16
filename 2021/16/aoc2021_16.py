@@ -7,16 +7,14 @@ from math import prod
 
 
 def bitstream(iterable):
+    """ generates stream of bits from the list of hex characters """
     for letter in iterable:
-        bits = bin(int(letter, 16))[2:]
-        for _ in range(4 - len(bits)):
-            yield "0"
-        for bit in bits:
+        for bit in format(int(letter, 16), "04b"):
             yield bit
 
 
 def take(iterable, length):
-    """ returns bits of requested count """
+    """ returns a string of bits of requested count """
     return ''.join(islice(iterable, length))
 
 
@@ -39,7 +37,7 @@ def parse_packet(stream, level=0):
     # operator
     if next(stream) == '0': # length ID - 15 bits == subpacket size in bits
         sub_len = pack(take(stream, 15))
-        substream = iter(take(stream, sub_len))
+        substream = islice(stream, sub_len)
         packets = []
         while True:
             try:
@@ -62,27 +60,24 @@ def sum_packet_versions(packet):
 
 def eval_packets(packet):
     _, id, value = packet
-    if id == 0: # sum
-        return sum(map(eval_packets, value))
-    elif id == 1: # product
-        return prod(map(eval_packets, value))
-    elif id == 2: # min
-        return min(map(eval_packets, value))
-    elif id == 3: # product
-        return max(map(eval_packets, value))
-    elif id == 4: # literal
+    assert id in range(8), f"Unexpected packet id {id}"
+    if id == 4: # literal
         return value
-    elif id == 5: # greater then
-        assert(len(value) == 2)
-        return gt(*map(eval_packets, value))
-    elif id == 6: # less then
-        assert(len(value) == 2)
-        return lt(*map(eval_packets, value))
-    elif id == 7: # equal
-        assert(len(value) == 2)
-        return eq(*map(eval_packets, value))
-    else:
-        assert 0, f"unknown id {id}"
+    subexpr = map(eval_packets, value)
+    if id == 0: # sum
+        return sum(subexpr)
+    if id == 1: # product
+        return prod(subexpr)
+    if id == 2: # min
+        return min(subexpr)
+    if id == 3: # product
+        return max(subexpr)
+    if id == 5: # greater then
+        return gt(*subexpr)
+    if id == 6: # less then
+        return lt(*subexpr)
+    if id == 7: # equal
+        return eq(*subexpr)
 
 
 def test():
