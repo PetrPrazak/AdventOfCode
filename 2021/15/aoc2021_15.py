@@ -4,7 +4,7 @@ import time
 from pathlib import Path
 from heapq import heappush, heappop
 from functools import wraps
-
+from math import inf as INFINITY
 
 def timeit(method):
     @wraps(method)
@@ -23,19 +23,21 @@ def neighbors4(point):
     return (x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)
 
 
-def dijkstra(start_vertex, value_f, moves_f):
+def dijkstra(start_vertex, target, value_f, moves_f):
     D = {start_vertex: 0}
     pq = [(0, start_vertex)]
     while pq:
         total, current_vertex = heappop(pq)
+        if current_vertex == target:
+            return total
         if total <= D[current_vertex]:
             for neighbor in moves_f(current_vertex):
-                old_cost = D.get(neighbor, float('inf'))
+                old_cost = D.get(neighbor, INFINITY)
                 new_cost = total + value_f(neighbor)
                 if new_cost < old_cost:
                     heappush(pq, (new_cost, neighbor))
                     D[neighbor] = new_cost
-    return D
+    return INFINITY
 
 
 @timeit
@@ -44,8 +46,6 @@ def get_lowest_path(data, part=1):
         return x in range(size[0]) and y in range(size[1])
 
     def moves(node):
-        if node == end_node:
-            return []
         return [p for p in neighbors4(node) if in_bounds(*p)]
 
     def value(node):
@@ -61,8 +61,8 @@ def get_lowest_path(data, part=1):
     max_x, max_y = len(data[0]), len(data)
     size = (max_x * scale, max_y * scale)
     end_node = size[0] - 1, size[1] - 1
-    r = dijkstra((0,0), value, moves)
-    return r[end_node]
+    r = dijkstra((0,0), end_node, value, moves)
+    return r
 
 
 def process(data):
@@ -70,7 +70,6 @@ def process(data):
     result = get_lowest_path(data, 1)
     print("part 1:", result)
     # part 2
-    result = 0
     result = get_lowest_path(data, 2)
     print("part 2:", result)
 
