@@ -1,20 +1,14 @@
 # https://adventofcode.com/2021/day/16
 from __future__ import print_function
-from pprint import pprint
 from pathlib import Path
 from operator import eq, gt, lt
 from itertools import islice
-from string import digits
 from math import prod
 
 
 def bitstream(iterable):
     for letter in iterable:
-        if letter in digits:
-            num = ord(letter) - ord('0')
-        else:
-            num = ord(letter) - ord('A') + 10
-        bits = bin(num)[2:]
+        bits = bin(int(letter, 16))[2:]
         for _ in range(4 - len(bits)):
             yield "0"
         for bit in bits:
@@ -26,11 +20,10 @@ def take(iterable, length):
     return ''.join(islice(iterable, length))
 
 
-def pack(iterable):
+def pack(bits):
     """ converts the bits into a corresponding number """
-    s = ''.join(iterable)
-    if not s: raise StopIteration
-    return int(s, 2)
+    if not bits: raise StopIteration
+    return int(bits, 2)
 
 
 def parse_packet(stream, level=0):
@@ -38,59 +31,58 @@ def parse_packet(stream, level=0):
     id = pack(take(stream, 3))
     if id == 4: # literal num
         last = False
-        bitnum = []
+        bitnum = ""
         while not last:
             last = next(stream) == '0'
-            bitnum.append(take(stream, 4))
+            bitnum += take(stream, 4)
         return version, id, pack(bitnum)
-    else: # operator
-        if next(stream) == '0': # length ID - 15 bits == subpacket size in bits
-            sub_len = pack(take(stream, 15))
-            substream = iter(take(stream, sub_len))
-            packets = []
-            while True:
-                try:
-                    packets.append(parse_packet(substream, level+1))
-                except StopIteration:
-                    break
-            return version, id, packets
-        else: # next 11 bits == number of subpackets
-            packets = pack(take(stream, 11))
-            return version, id, list(parse_packet(stream, level+1) for _ in range(packets))
+    # operator
+    if next(stream) == '0': # length ID - 15 bits == subpacket size in bits
+        sub_len = pack(take(stream, 15))
+        substream = iter(take(stream, sub_len))
+        packets = []
+        while True:
+            try:
+                packets.append(parse_packet(substream, level+1))
+            except StopIteration:
+                break
+        return version, id, packets
+    else: # next 11 bits == number of subpackets
+        subpackets = pack(take(stream, 11))
+        packets = list(parse_packet(stream, level+1) for _ in range(subpackets))
+        return version, id, packets
 
 
 def sum_packet_versions(packet):
     version, _,  value = packet
     if isinstance(value, list):
         return version + sum(map(sum_packet_versions, value))
-    else:
-        return version
+    return version
 
 
 def eval_packets(packet):
     _, id, value = packet
-    if isinstance(value, list):
-        if id == 0: # sum
-            return sum(map(eval_packets, value))
-        elif id == 1: # product
-            return prod(map(eval_packets, value))
-        elif id == 2: # min
-            return min(map(eval_packets, value))
-        elif id == 3: # product
-            return max(map(eval_packets, value))
-        elif id == 5: # greater then
-            assert(len(value) == 2)
-            return gt(*map(eval_packets, value))
-        elif id == 6: # less then
-            assert(len(value) == 2)
-            return lt(*map(eval_packets, value))
-        elif id == 7: # equal
-            assert(len(value) == 2)
-            return eq(*map(eval_packets, value))
-        else:
-            assert 0, f"unknown id {id}"
-    else:
+    if id == 0: # sum
+        return sum(map(eval_packets, value))
+    elif id == 1: # product
+        return prod(map(eval_packets, value))
+    elif id == 2: # min
+        return min(map(eval_packets, value))
+    elif id == 3: # product
+        return max(map(eval_packets, value))
+    elif id == 4: # literal
         return value
+    elif id == 5: # greater then
+        assert(len(value) == 2)
+        return gt(*map(eval_packets, value))
+    elif id == 6: # less then
+        assert(len(value) == 2)
+        return lt(*map(eval_packets, value))
+    elif id == 7: # equal
+        assert(len(value) == 2)
+        return eq(*map(eval_packets, value))
+    else:
+        assert 0, f"unknown id {id}"
 
 
 def test():
