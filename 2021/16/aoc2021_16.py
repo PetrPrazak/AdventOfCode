@@ -18,35 +18,35 @@ def take(iterable, length):
     return ''.join(islice(iterable, length))
 
 
-def pack(bits):
+def unpack(bits):
     """ converts the bits into a corresponding number """
-    if not bits: raise StopIteration
     return int(bits, 2)
 
 
 def parse_packet(stream, level=0):
-    version = pack(take(stream, 3))
-    id = pack(take(stream, 3))
+    version = unpack(take(stream, 3))
+    id = unpack(take(stream, 3))
     if id == 4: # literal num
         last = False
         bitnum = ""
         while not last:
             last = next(stream) == '0'
             bitnum += take(stream, 4)
-        return version, id, pack(bitnum)
+        return version, id, unpack(bitnum)
     # operator
     if next(stream) == '0': # length ID - 15 bits == subpacket size in bits
-        sub_len = pack(take(stream, 15))
+        sub_len = unpack(take(stream, 15))
         substream = islice(stream, sub_len)
         packets = []
         while True:
             try:
                 packets.append(parse_packet(substream, level+1))
-            except StopIteration:
+            except ValueError:
+                # unpack failed, substream is exhausted
                 break
         return version, id, packets
     else: # next 11 bits == number of subpackets
-        subpackets = pack(take(stream, 11))
+        subpackets = unpack(take(stream, 11))
         packets = list(parse_packet(stream, level+1) for _ in range(subpackets))
         return version, id, packets
 
