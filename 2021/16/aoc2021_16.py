@@ -1,7 +1,6 @@
 # https://adventofcode.com/2021/day/16
 from __future__ import print_function
 from pathlib import Path
-from operator import eq, gt, lt
 from itertools import islice
 from math import prod
 
@@ -26,7 +25,7 @@ def unpack(bits):
 def parse_packet(stream, level=0):
     version = unpack(take(stream, 3))
     id = unpack(take(stream, 3))
-    if id == 4: # literal num
+    if id == 4:  # literal num
         last = False
         bitnum = ""
         while not last:
@@ -34,7 +33,7 @@ def parse_packet(stream, level=0):
             bitnum += take(stream, 4)
         return version, id, unpack(bitnum)
     # operator
-    if next(stream) == '0': # length ID - 15 bits == subpacket size in bits
+    if next(stream) == '0':  # length ID - 15 bits == subpacket size in bits
         sub_len = unpack(take(stream, 15))
         substream = islice(stream, sub_len)
         packets = []
@@ -42,42 +41,34 @@ def parse_packet(stream, level=0):
             try:
                 packets.append(parse_packet(substream, level+1))
             except ValueError:
-                # unpack failed, substream is exhausted
-                break
+                break  # unpack failed, substream is exhausted
         return version, id, packets
-    else: # next 11 bits == number of subpackets
+    else:  # next 11 bits == number of subpackets
         subpackets = unpack(take(stream, 11))
         packets = list(parse_packet(stream, level+1) for _ in range(subpackets))
         return version, id, packets
 
 
 def sum_packet_versions(packet):
-    version, _,  value = packet
-    if isinstance(value, list):
-        return version + sum(map(sum_packet_versions, value))
-    return version
+    version, id, value = packet
+    if id == 4:
+        return version
+    return version + sum(map(sum_packet_versions, value))
+
+
+OPS = [sum, prod, min, max,
+       lambda n: n,
+       lambda l: next(l) > next(l),
+       lambda l: next(l) < next(l),
+       lambda l: next(l) == next(l)]
 
 
 def eval_packets(packet):
     _, id, value = packet
     assert id in range(8), f"Unexpected packet id {id}"
-    if id == 4: # literal
+    if id == 4:  # literal
         return value
-    subexpr = map(eval_packets, value)
-    if id == 0: # sum
-        return sum(subexpr)
-    if id == 1: # product
-        return prod(subexpr)
-    if id == 2: # min
-        return min(subexpr)
-    if id == 3: # product
-        return max(subexpr)
-    if id == 5: # greater then
-        return gt(*subexpr)
-    if id == 6: # less then
-        return lt(*subexpr)
-    if id == 7: # equal
-        return eq(*subexpr)
+    return OPS[id](map(eval_packets, value))
 
 
 def test():
