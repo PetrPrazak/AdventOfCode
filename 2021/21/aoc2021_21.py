@@ -1,7 +1,7 @@
 # https://adventofcode.com/2021/day/21
 from __future__ import print_function
 from pathlib import Path
-from collections import defaultdict
+from collections import defaultdict, Counter
 from itertools import product
 
 
@@ -30,7 +30,7 @@ def play1(players):
     return score[1 - current] * die[1]
 
 
-dirac_die_rolls = tuple(map(sum, product(range(1, 4), repeat=3)))
+dirac_die_rolls = Counter(map(sum, product(range(1, 4), repeat=3)))
 
 
 def try_all_games(game_state):
@@ -38,23 +38,23 @@ def try_all_games(game_state):
     score = [0] * 2
     for (p1pos, p2pos, p1score, p2score, current), n in game_state.items():
         if current == 0:
-            for roll in dirac_die_rolls:
+            for roll, count in dirac_die_rolls.items():
                 p1_newpos = game_next(p1pos, roll)
                 p1_newscore = p1score + p1_newpos
                 if p1_newscore >= 21:
-                    score[current] += n
+                    score[current] += n * count
                 else:
                     new_game_state[p1_newpos, p2pos,
-                                   p1_newscore, p2score, 1 - current] += n
+                                   p1_newscore, p2score, 1 - current] += n * count
         else:
-            for roll in dirac_die_rolls:
+            for roll, count in dirac_die_rolls.items():
                 p2_newpos = game_next(p2pos, roll)
                 p2_newscore = p2score + p2_newpos
                 if p2_newscore >= 21:
-                    score[current] += n
+                    score[current] += n * count
                 else:
                     new_game_state[p1pos, p2_newpos,
-                                   p1score, p2_newscore, 1 - current] += n
+                                   p1score, p2_newscore, 1 - current] += n * count
     return new_game_state, score
 
 
