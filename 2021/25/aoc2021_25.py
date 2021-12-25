@@ -4,35 +4,39 @@ from pathlib import Path
 from itertools import count
 
 
+RIGHT = '>'
+DOWN = 'v'
+EMPTY = '.'
+
+
 def make_grid(data):
     return {(x, y): data[y][x]
             for y in range(len(data))
-            for x in range(len(data[y])) if data[y][x] != '.'}
+            for x in range(len(data[y])) if data[y][x] != EMPTY}
 
 
 def do_step(grid, height, width):
     newgrid = dict()
-
     moves = 0
+    # process all cucumbers heading east
     for pos, val in grid.items():
-        if val == '>':
+        if val == RIGHT:
             newpos = (pos[0] + 1) % width, pos[1]
-            if grid.get(newpos, '.') == '.':
+            if grid.get(newpos, EMPTY) == EMPTY:
                 newgrid[newpos] = val
                 moves += 1
             else:
                 newgrid[pos] = val
-
+    # now process all cucumbers heading south
     for pos, val in grid.items():
-        if val == 'v':
+        if val == DOWN:
             newpos = pos[0], (pos[1] + 1) % height
-            target = grid.get(newpos, '.')
-            if target != 'v' and newgrid.get(newpos, '.') == '.':
+            target = grid.get(newpos, EMPTY)
+            if target != DOWN and newgrid.get(newpos, EMPTY) == EMPTY:
                 newgrid[newpos] = val
                 moves += 1
             else:
                 newgrid[pos] = val
-
     return moves, newgrid
 
 
