@@ -1,32 +1,25 @@
 # https://adventofcode.com/2021/day/23
 from __future__ import print_function
 from pathlib import Path
-from itertools import count, repeat
+from itertools import count, repeat, chain
 from heapq import heappush, heappop
 from math import inf as INFINITY
+from functools import partial
 
-EMPTY = '.'
+EMPTY = 0
 PODS = 'ABCD'
-
-
-def listit(t):
-    """ converts nested tuples to nested lists """
-    return list(map(listit, t)) if isinstance(t, (list, tuple)) else t
-
-
-def tupleit(t):
-    """ converts nested lists to nested tuples """
-    return tuple(map(tupleit, t)) if isinstance(t, (list, tuple)) else t
 
 
 def parse_state(data):
     """ creates the initial state of the game """
-    boxes = [list() for _ in range(4)]
-    for line in data[2:-1]:
-        for i, idx in zip(count(0), range(3, 10, 2)):
-            boxes[i].append(line[idx])
-    hallway = tuple(data[1][1:12])
-    return tuple(tuple(b) for b in boxes), hallway
+    burrow_lines = data[2:-1]
+    burrow_size = len(burrow_lines)
+    boxes = [0] * (burrow_size * 4)
+    for i, idx in zip(count(0), range(3, 10, 2)):
+        for l, line in enumerate(burrow_lines):
+            boxes[burrow_size * i + l] = PODS.index(line[idx]) + 1
+    hallway = tuple([0] * 11)
+    return tuple(boxes), hallway
 
 
 def dijkstra(start, target, moves_f):
@@ -45,41 +38,49 @@ def dijkstra(start, target, moves_f):
 
 
 def pod_class(pod):
-    return PODS.index(pod)
+    return pod - 1
+
+
+COST = list(10 ** c for c in range(4))
 
 
 def pod_steps_cost(pod, steps):
-    return steps * 10 ** pod_class(pod)
+    return steps * COST[pod_class(pod)]
 
 
 def move_pod(state, burrow_idx, burrow_pos, hall_pos):
     """ swaps the content of specific burrow and a hallway """
     burrows, hallway = state
-    burrow_list = listit(burrows)
-    hallway_list = listit(hallway)
-    h, b = hallway_list[hall_pos], burrow_list[burrow_idx][burrow_pos]
-    burrow_list[burrow_idx][burrow_pos] = h
+    blen = len(burrows) // 4
+    b_pos = burrow_idx * blen + burrow_pos
+    h, b = hallway[hall_pos], burrows[b_pos]
+    burrow_list = list(burrows)
+    burrow_list[b_pos] = h
+    hallway_list = list(hallway)
     hallway_list[hall_pos] = b
-    return tupleit(burrow_list), tupleit(hallway_list)
+    return tuple(burrow_list), tuple(hallway_list)
 
 
 def move_pod_directly(state, burrow_idx, burrow_pos, target_burrow_idx, target_burrow_pos):
-    """ swaps the content of specific burrows  """
+    """ swaps the content of specific burrows """
     burrows, hallway = state
-    b1, b2 = burrows[target_burrow_idx][target_burrow_pos], burrows[burrow_idx][burrow_pos]
-    burrow_list = listit(burrows)
-    burrow_list[target_burrow_idx][target_burrow_pos] = b2
-    burrow_list[burrow_idx][burrow_pos] = b1
-    return tupleit(burrow_list), hallway
+    blen = len(burrows) // 4
+    target_pos = target_burrow_idx * blen + target_burrow_pos
+    source_pos = burrow_idx * blen + burrow_pos
+    b1, b2 = burrows[target_pos], burrows[source_pos]
+    burrow_list = list(burrows)
+    burrow_list[source_pos] = b1
+    burrow_list[target_pos] = b2
+    return tuple(burrow_list), hallway
 
 
-def game_moves(state):
+def game_moves(burrow_len, state):
     burrows, hallway = state
 
     def is_hallway_clear(start, end):
         if start > end:
             start, end = end, start
-        return all(hallway[i] == EMPTY for i in range(start+1, end))
+        return sum(hallway[start+1: end]) == 0
 
     def last_empty_cell(burrow):
         idx = 0
@@ -94,12 +95,15 @@ def game_moves(state):
         """ mapping from burrow index to its hallway door index """
         return (1 + burrow_idx) * 2
 
+    def get_burrow(burrow_idx):
+        return burrows[burrow_idx * burrow_len: (burrow_idx + 1) * burrow_len]
+
     # check if a pod can move from the hallway to its burrow
     for h_idx, pod in enumerate(hallway):
         if pod == EMPTY:
             continue
         target_burrow_idx = pod_class(pod)
-        burrow = burrows[target_burrow_idx]
+        burrow = get_burrow(target_burrow_idx)
         target_door_idx = door_idx(target_burrow_idx)
         if not (can_move_home(burrow, pod) and is_hallway_clear(h_idx, target_door_idx)):
             continue
@@ -109,47 +113,51 @@ def game_moves(state):
         yield move_pod(state, target_burrow_idx, pod_idx, h_idx), cost
 
     # now check if any pod can move to any hallway place
-    for b_idx, burrow in enumerate(burrows):
-        for pod_idx, pod in enumerate(burrow):
-            if pod == EMPTY:
+    for b_idx, pod in enumerate(burrows):
+        if pod == EMPTY:
+            continue
+        b_idx, pod_idx = divmod(b_idx, burrow_len)
+        burrow = get_burrow(b_idx)
+        target_burrow_idx = pod_class(pod)
+        if target_burrow_idx == b_idx:
+            # we are already in the right burrow
+            if can_move_home(burrow, pod):
                 continue
-            target_burrow_idx = pod_class(pod)
-            if target_burrow_idx == b_idx:
-                # we are already in the right burrow
-                if can_move_home(burrow, pod):
-                    continue
-            if any(burrow[i] != EMPTY for i in range(pod_idx-1, -1, -1)):
-                # can't get out from burrow
-                continue
-            h_door_idx = door_idx(b_idx)
-            # check if we can go directly to target burrow
-            target_door_idx = door_idx(target_burrow_idx)
-            target_burrow = burrows[target_burrow_idx]
-            if can_move_home(target_burrow, pod) and is_hallway_clear(h_door_idx, target_door_idx):
-                target_pos = last_empty_cell(target_burrow)
-                steps = abs(h_door_idx - target_door_idx) + pod_idx + target_pos + 2
-                cost = pod_steps_cost(pod, steps)
-                yield move_pod_directly(state, b_idx, pod_idx, target_burrow_idx, target_pos), cost
-                continue
+        if pod_idx > 0 and any(burrow[i] != EMPTY for i in range(pod_idx-1, -1, -1)):
+            # can't get out from burrow
+            continue
+        h_door_idx = door_idx(b_idx)
+        # check if we can go directly to target burrow
+        target_door_idx = door_idx(target_burrow_idx)
+        target_burrow = get_burrow(target_burrow_idx)
+        if can_move_home(target_burrow, pod) and is_hallway_clear(h_door_idx, target_door_idx):
+            target_pos = last_empty_cell(target_burrow)
+            steps = abs(h_door_idx - target_door_idx) + \
+                pod_idx + target_pos + 2
+            cost = pod_steps_cost(pod, steps)
+            yield move_pod_directly(state, b_idx, pod_idx, target_burrow_idx, target_pos), cost
+            continue
 
-            for h_idx, h_place in enumerate(hallway):
-                if h_idx in range(2, 10, 2) or h_place != EMPTY:
-                    # can't move to a door or an occupied place
-                    continue
-                if not is_hallway_clear(h_idx, h_door_idx):
-                    # path is blocked
-                    continue
-                steps = pod_idx + abs(h_idx - h_door_idx) + 1
-                cost = pod_steps_cost(pod, steps)
-                yield move_pod(state, b_idx, pod_idx, h_idx), cost
+        for h_idx, h_place in enumerate(hallway):
+            if h_idx in range(2, 10, 2) or h_place != EMPTY:
+                # can't move to a door or an occupied place
+                continue
+            if not is_hallway_clear(h_idx, h_door_idx):
+                # path is blocked
+                continue
+            steps = pod_idx + abs(h_idx - h_door_idx) + 1
+            cost = pod_steps_cost(pod, steps)
+            yield move_pod(state, b_idx, pod_idx, h_idx), cost
 
 
 def play(data):
     start_state = parse_state(data)
-    burrow_len = len(start_state[0][0])
-    end_burrows = tuple(tuple(repeat(pod, burrow_len)) for pod in PODS)
+    burrow_len = len(start_state[0]) // 4
+    end_burrows = tuple(p for pod in range(1, 5)
+                        for p in repeat(pod, burrow_len))
     end_state = end_burrows, start_state[1]
-    return dijkstra(start_state, end_state, game_moves)
+    moves = partial(game_moves, burrow_len)
+    return dijkstra(start_state, end_state, moves)
 
 
 def process(data):
