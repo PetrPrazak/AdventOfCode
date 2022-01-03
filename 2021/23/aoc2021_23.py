@@ -63,66 +63,82 @@ def move_pod(state, burrow_idx, burrow_pos, hall_pos):
     return tupleit(burrow_list), tupleit(hallway_list)
 
 
+def move_pod_directly(state, burrow_idx, burrow_pos, target_burrow_idx, target_burrow_pos):
+    """ swaps the content of specific burrows  """
+    burrows, hallway = state
+    b1, b2 = burrows[target_burrow_idx][target_burrow_pos], burrows[burrow_idx][burrow_pos]
+    burrow_list = listit(burrows)
+    burrow_list[target_burrow_idx][target_burrow_pos] = b2
+    burrow_list[burrow_idx][burrow_pos] = b1
+    return tupleit(burrow_list), hallway
+
+
 def game_moves(state):
     burrows, hallway = state
+
+    def is_hallway_clear(start, end):
+        if start > end:
+            start, end = end, start
+        return all(hallway[i] == EMPTY for i in range(start+1, end))
+
+    def last_empty_cell(burrow):
+        idx = 0
+        while idx < len(burrow) and burrow[idx] == EMPTY:
+            idx += 1
+        return idx - 1
+
+    def can_move_home(burrow, pod):
+        return all(b == EMPTY or b == pod for b in burrow)
+
+    def door_idx(burrow_idx):
+        """ mapping from burrow index to its hallway door index """
+        return (1 + burrow_idx) * 2
+
     # check if a pod can move from the hallway to its burrow
     for h_idx, pod in enumerate(hallway):
         if pod == EMPTY:
             continue
-        target_burrow = pod_class(pod)
-        burrow = burrows[target_burrow]
-        if any(b != EMPTY and b != pod for b in burrow):
-            # can't move if not empty of other pods still there
+        target_burrow_idx = pod_class(pod)
+        burrow = burrows[target_burrow_idx]
+        target_door_idx = door_idx(target_burrow_idx)
+        if not (can_move_home(burrow, pod) and is_hallway_clear(h_idx, target_door_idx)):
             continue
-        target_door_idx = (1 + target_burrow) * 2
-        if h_idx < target_door_idx:
-            # check if hallway is clear to the right
-            if any(hallway[i] != EMPTY for i in range(h_idx+1, target_door_idx)):
-                continue
-        else:
-            # check if hallway is clear to the left
-            if any(hallway[i] != EMPTY for i in range(target_door_idx+1, h_idx)):
-                continue
-        # find the last empty burrow position
-        pod_idx = 0
-        while pod_idx < len(burrow) and burrow[pod_idx] == EMPTY:
-            pod_idx += 1
-        pod_idx -= 1
-        # calculate the cost of the move
+        pod_idx = last_empty_cell(burrow)
         steps = abs(h_idx - target_door_idx) + pod_idx + 1
         cost = pod_steps_cost(pod, steps)
-        yield move_pod(state, target_burrow, pod_idx, h_idx), cost
+        yield move_pod(state, target_burrow_idx, pod_idx, h_idx), cost
 
     # now check if any pod can move to any hallway place
     for b_idx, burrow in enumerate(burrows):
         for pod_idx, pod in enumerate(burrow):
             if pod == EMPTY:
                 continue
-            target_burrow = pod_class(pod)
-            if target_burrow == b_idx:
+            target_burrow_idx = pod_class(pod)
+            if target_burrow_idx == b_idx:
                 # we are already in the right burrow
-                if all(b == EMPTY or b == pod for b in burrow):
+                if can_move_home(burrow, pod):
                     continue
             if any(burrow[i] != EMPTY for i in range(pod_idx-1, -1, -1)):
                 # can't get out from burrow
                 continue
+            h_door_idx = door_idx(b_idx)
+            # check if we can go directly to target burrow
+            target_door_idx = door_idx(target_burrow_idx)
+            target_burrow = burrows[target_burrow_idx]
+            if can_move_home(target_burrow, pod) and is_hallway_clear(h_door_idx, target_door_idx):
+                target_pos = last_empty_cell(target_burrow)
+                steps = abs(h_door_idx - target_door_idx) + pod_idx + target_pos + 2
+                cost = pod_steps_cost(pod, steps)
+                yield move_pod_directly(state, b_idx, pod_idx, target_burrow_idx, target_pos), cost
+                continue
+
             for h_idx, h_place in enumerate(hallway):
-                if h_idx in range(2, 10, 2):
-                    # can't stand in any door
+                if h_idx in range(2, 10, 2) or h_place != EMPTY:
+                    # can't move to a door or an occupied place
                     continue
-                if h_place != EMPTY:
-                    # hallway not empty
+                if not is_hallway_clear(h_idx, h_door_idx):
+                    # path is blocked
                     continue
-                h_door_idx = (1 + b_idx) * 2
-                if h_idx < h_door_idx:
-                    # check if hallway is clear to the left
-                    if any(hallway[i] != EMPTY for i in range(h_idx, h_door_idx)):
-                        continue
-                else:
-                    # check if hallway is clear to the right
-                    if any(hallway[i] != EMPTY for i in range(h_door_idx+1, h_idx)):
-                        continue
-                # calculate the cost of the move
                 steps = pod_idx + abs(h_idx - h_door_idx) + 1
                 cost = pod_steps_cost(pod, steps)
                 yield move_pod(state, b_idx, pod_idx, h_idx), cost
