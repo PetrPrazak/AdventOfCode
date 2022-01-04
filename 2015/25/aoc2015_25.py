@@ -12,25 +12,29 @@ def gen_code():
         code = (code * 252533) % 33554393
 
 
-def process(data):
+def bf_part1(data):
     col, row = 1, 1
-    diag_row = 1
-    for i in count(1):
+    for _, code in zip(count(1), gen_code()):
         if row == data[0] and col == data[1]:
-            break
-        row -= 1
-        col += 1
-        if row == 0:
-            diag_row += 1
-            row = diag_row
+            return code
+        if row == 1:
+            row = col + 1
             col = 1
+        else:
+            row -= 1
+            col += 1
 
-    for _, code in zip(range(i), gen_code()):
-        pass
 
+def fast_part1(data):
+    def triangle(row, col):
+        return ((row + col) ** 2 - 3 * row - col) // 2
+    return pow(252533, triangle(*data), 33554393) * 20151125 % 33554393
+
+
+def process(data):
     # part 1
-    result = code
-    print("part 1:", result)
+    # print("part 1:", bf_part1(data))
+    print("part 1:", fast_part1(data))
 
 
 def load_data(fileobj):
