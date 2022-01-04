@@ -7,6 +7,8 @@ from itertools import product
 
 START_HIT_POINTS = 100
 
+Player = namedtuple('Player', 'hit_point damage armor')
+
 Item = namedtuple('Item', 'name cost damage armor')
 Weapons = [
     Item("Dagger", 8, 4, 0),
@@ -38,24 +40,24 @@ Rings = [
 
 def fight(player, boss):
     """ returns True if player wins """
-    pl_hp, boss_hp = player[0], boss[0]
-    pl_damage = max(1, player[1] - boss[2])
-    boss_damage = max(1, boss[1] - player[2])
-    p1, p2 = divmod(pl_hp, boss_damage)
-    b1, b2 = divmod(boss_hp, pl_damage)
-    return p1 > b1 or p1 == b1 and p2 >= b2
+    pl_damage = max(1, player.damage - boss.armor)
+    boss_damage = max(1, boss.damage - player.armor)
+    pl_round, pl_rem = divmod(player.hit_point, boss_damage)
+    boss_round, boss_rem = divmod(boss.hit_point, pl_damage)
+    return pl_round > boss_round \
+        or pl_round == boss_round and pl_rem >= boss_rem
 
 
 def process(data):
-    min_cost = 9999
-    max_cost = 0
+    boss = Player(data[0], data[1], data[2])
+    min_cost, max_cost = 9999, 0
     for w, a, r1, r2 in product(Weapons, Armor, Rings, Rings):
         if r1.name and r2.name and r1 == r2:
             continue
         cost = w.cost + a.cost + r1.cost + r2.cost
         damage = w.damage + a.damage + r1.damage + r2.damage
         armor = w.armor + a.armor + r1.armor + r2.armor
-        if fight([START_HIT_POINTS, damage, armor], data):
+        if fight(Player(START_HIT_POINTS, damage, armor), boss):
             min_cost = min(cost, min_cost)
         else:
             max_cost = max(cost, max_cost)
