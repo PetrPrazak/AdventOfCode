@@ -297,8 +297,6 @@ Find somewhere safe to land your submarine. **What is the first step on which no
 
 Your puzzle answer was `353`.
 
-The first half of this puzzle is complete! It provides one gold star: *
-
 ## Part Two
 
 Suddenly, the experimental antenna control console lights up:
