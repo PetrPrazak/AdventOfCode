@@ -1,6 +1,5 @@
 # https://adventofcode.com/2021/day/18
 from __future__ import print_function
-from pprint import pprint
 from pathlib import Path
 from itertools import permutations, starmap
 from functools import reduce
@@ -23,6 +22,12 @@ def printable(sf):
 
 
 def sf_reduce(sf_str):
+    def patch_number(rng, val):
+        for i in rng:
+            if is_number(sf[i]):
+                sf[i] += val
+                return
+
     sf = [int(x) if x.isdigit() else x for x in sf_str]
     repeat = True
     while repeat:
@@ -37,19 +42,10 @@ def sf_reduce(sf_str):
                     left, right = sf[pos+1], sf[pos+3]
                     del sf[pos+1:pos+5]
                     sf[pos] = 0
-                    num_pos = pos + 1
-                    while num_pos < len(sf) and not is_number(sf[num_pos]):
-                        num_pos += 1
-                    if num_pos < len(sf):
-                        sf[num_pos] += right
-                    num_pos = pos - 1
-                    while num_pos > 0 and not is_number(sf[num_pos]):
-                        num_pos -= 1
-                    if num_pos > 0:
-                        sf[num_pos] += left
+                    patch_number(range(pos+1, len(sf)), right)
+                    patch_number(range(pos-1, 0, -1), left)
                     repeat = True
                     level -= 1
-                    continue
             elif n == ']':
                 level -= 1
             pos += 1
