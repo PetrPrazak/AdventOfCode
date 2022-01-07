@@ -1,5 +1,4 @@
 # https://adventofcode.com/2019/
-
 # Common functions and classes useful for AoC
 
 from __future__ import print_function
@@ -9,7 +8,7 @@ from collections import Counter, defaultdict, namedtuple, deque
 from itertools import permutations, combinations, chain, cycle, product, islice
 import time
 from functools import wraps
-
+from heapq import heappop, heappush
 
 def transpose(matrix): return zip(*matrix)
 
@@ -84,7 +83,6 @@ def euclidean_distance(p, q=(0, 0)):
 
 def trace1(f):
     """Print a trace of the input and output of a function on one line."""
-
     def traced_f(*args):
         result = f(*args)
         print('{}({}) = {}'.format(f.__name__, ', '.join(map(str, args)), result))
@@ -142,9 +140,7 @@ def render_grid(grid):
     out = ""
     for line in range(min_y, max_y + 1):
         for col in range(min_x, max_x + 1):
-            pos = col, line
-            pixel = grid[pos] if pos in grid else ' '
-            out += pixel
+            out += grid.get((col, line), ' ')
         out += '\n'
     return out
 

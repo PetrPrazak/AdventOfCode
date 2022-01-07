@@ -217,7 +217,7 @@ class IntCode(object):
                     self._trace_mem("BASE = %r" % self.base)
 
             elif op == OpCode.HLT:
-                raise StopIteration
+                return
 
             self.pc = next_pc
 
