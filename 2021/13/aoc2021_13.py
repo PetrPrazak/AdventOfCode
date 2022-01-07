@@ -4,19 +4,18 @@ from pprint import pprint
 from pathlib import Path
 from functools import reduce
 
+
 def minmax_tuples(tuple_list, element=0):
     res = sorted(tuple_list, key=lambda k: k[element])
     return res[0][element], res[-1][element]
 
 
-def render_grid(coords, on='*', off=' '):
+def render_grid(coords, on='██', off='  '):
     min_x, max_x = minmax_tuples(coords, 0)
     min_y, max_y = minmax_tuples(coords, 1)
-    out = ""
-    for y in range(min_y, max_y + 1):
-        for x in range(min_x, max_x + 1):
-            out += on if (x, y) in coords else off
-        out += '\n'
+    out = "\n".join(''.join((off, on)[(x, y) in coords]
+                            for x in range(min_x, max_x + 1))
+                    for y in range(min_y, max_y + 1))
     return out
 
 
