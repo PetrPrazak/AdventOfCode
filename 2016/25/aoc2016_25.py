@@ -4,7 +4,7 @@ from pprint import pprint
 from pathlib import Path
 from collections import defaultdict
 
-MAX_OUT = 10
+MAX_OUT = 12
 
 def emulate(prog, registers):
     def value(arg):
