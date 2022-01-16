@@ -28,11 +28,11 @@ MAKE_URL = False
 OVERWRITE = False
 
 # DATE SPECIFIC PARAMETERS
-starting_advent_of_code_year = 2021  # You can go as early as 2015.
+starting_advent_of_code_year = 2016  # You can go as early as 2015.
 # The setup will download all advent of code data up until that date included
-last_advent_of_code_year = 2021
+last_advent_of_code_year = 2016
 # If the year isn't finished, the setup will download days up until that day included for the last year
-last_advent_of_code_day = 25
+last_advent_of_code_day = 11
 # Imports
 try:
     import requests
@@ -155,6 +155,8 @@ for y in years:
                                 if CONVERT_TO_MD:
                                     statement.write(md_header(y,d))
                                 statement.write(text)
+                        else:
+                            print(f"        Server response for README is not valid, status={response.status_code}")
                         done = True
                 except requests.exceptions.RequestException:
                     error_count += 1
