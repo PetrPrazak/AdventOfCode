@@ -28,11 +28,11 @@ MAKE_URL = False
 OVERWRITE = False
 
 # DATE SPECIFIC PARAMETERS
-starting_advent_of_code_year = 2016  # You can go as early as 2015.
+starting_advent_of_code_year = 2018  # You can go as early as 2015.
 # The setup will download all advent of code data up until that date included
-last_advent_of_code_year = 2016
+last_advent_of_code_year = 2018
 # If the year isn't finished, the setup will download days up until that day included for the last year
-last_advent_of_code_day = 11
+last_advent_of_code_day = 17
 # Imports
 try:
     import requests
