@@ -1,8 +1,6 @@
 # https://adventofcode.com/2019/day/21
 from __future__ import print_function
-import sys
 from pathlib import Path
-sys.path.append(str(Path(__file__).resolve().parent.parent))
 from aoc import read_input_ints_separated
 from aoc.intcode import IntCode
 
