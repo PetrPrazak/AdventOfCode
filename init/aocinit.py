@@ -28,11 +28,11 @@ MAKE_URL = False
 OVERWRITE = False
 
 # DATE SPECIFIC PARAMETERS
-starting_advent_of_code_year = 2019  # You can go as early as 2015.
+starting_advent_of_code_year = 2022  # You can go as early as 2015.
 # The setup will download all advent of code data up until that date included
-last_advent_of_code_year = 2019
+last_advent_of_code_year = 2022
 # If the year isn't finished, the setup will download days up until that day included for the last year
-last_advent_of_code_day = 23
+last_advent_of_code_day = 2
 # Imports
 try:
     import requests
@@ -51,9 +51,10 @@ years = range(starting_advent_of_code_year, last_advent_of_code_year+1)
 days = range(last_advent_of_code_day, 26)
 # ex use : https://adventofcode.com/2017/day/19/input
 aoc_link = "https://adventofcode.com/"
-USER_AGENT = "adventofcode_working_directories_creator"
+USER_AGENT = "github.com/PetrPrazak/AdventOfCode/blob/master/init/aocinit.py by prazakp@gmail.com"
 session_id = os.environ.get('AOC_SESSION_ID', None) or USER_SESSION_ID
 py_template = ""
+
 
 def get_template():
     global py_template
@@ -72,7 +73,7 @@ def template(year, day):
     return get_template().format(**locals())
 
 
-def md_header(y,d):
+def md_header(y, d):
     return f"""# Day {d}
 Copyright (c) Eric Wastl
 #### [Source](https://adventofcode.com/{y}/day/{d})
@@ -80,9 +81,10 @@ Copyright (c) Eric Wastl
 ## Part 1
 """
 
+
 def make_md(text):
-    text = re.sub(r"(<code>)(<em>)",r"\2\1", text)
-    text = re.sub(r"(</em>)(</code>)",r"\2\1", text)
+    text = re.sub(r"(<code>)(<em>)", r"\2\1", text)
+    text = re.sub(r"(</em>)(</code>)", r"\2\1", text)
     return md(text, heading_style=ATX)
 
 
@@ -136,7 +138,7 @@ for y in years:
                     print("        Non handled error while requesting input from server.", e)
                     done = True
 
-        readme_path = day_pos+ ("/README.md" if CONVERT_TO_MD else "/statement.html")
+        readme_path = day_pos + ("/README.md" if CONVERT_TO_MD else "/statement.html")
         if DOWNLOAD_STATEMENTS and (not os.path.exists(readme_path) or OVERWRITE):
             done = False
             error_count = 0
@@ -153,7 +155,7 @@ for y in years:
                                 text = make_md(text)
                             with open(readme_path, "w+") as statement:
                                 if CONVERT_TO_MD:
-                                    statement.write(md_header(y,d))
+                                    statement.write(md_header(y, d))
                                 statement.write(text)
                         else:
                             print(f"        Server response for README is not valid, status={response.status_code}")
