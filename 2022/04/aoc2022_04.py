@@ -13,10 +13,7 @@ def is_contained(l1, r1, l2, r2):
 
 
 def is_overlapping(l1, r1, l2, r2):
-    if l1 < l2:
-        return r1 > r2 or l2 <= r1 <= r2
-    else:
-        return r2 > r1 or l1 <= r2 <= r1
+    return max(l1, l2) <= min(r1, r2)
 
 
 def process(data):
