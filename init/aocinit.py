@@ -32,7 +32,7 @@ starting_advent_of_code_year = 2022  # You can go as early as 2015.
 # The setup will download all advent of code data up until that date included
 last_advent_of_code_year = 2022
 # If the year isn't finished, the setup will download days up until that day included for the last year
-last_advent_of_code_day = 2
+last_advent_of_code_day = 4
 # Imports
 try:
     import requests
@@ -51,7 +51,7 @@ years = range(starting_advent_of_code_year, last_advent_of_code_year+1)
 days = range(last_advent_of_code_day, 26)
 # ex use : https://adventofcode.com/2017/day/19/input
 aoc_link = "https://adventofcode.com/"
-USER_AGENT = "github.com/PetrPrazak/AdventOfCode/blob/master/init/aocinit.py by prazakp@gmail.com"
+USER_AGENT = "adventofcode_working_directories_creator"
 session_id = os.environ.get('AOC_SESSION_ID', None) or USER_SESSION_ID
 py_template = ""
 
