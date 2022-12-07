@@ -1,20 +1,24 @@
 # https://adventofcode.com/2022/day/7
 from pathlib import Path
 
+ROOT = "/"
+PATH_SEP = "/"
+UPDIR = ".."
+
 
 def build_fs(data):
-    cwd = FS = {}
+    cwd = root_dir = {}
     for line in data:
         line = line.rstrip()
         if line[0] == '$':  # command
             _, cmd, *args = line.split()
             if cmd == "cd":
                 arg = args[0]
-                cwd = FS if arg == '/' else cwd[arg]
+                cwd = root_dir if arg == ROOT else cwd[arg]
         else:
             size, name = line.split()
-            cwd[name] = {"..": cwd} if size == "dir" else int(size)
-    return FS
+            cwd[name] = {UPDIR: cwd} if size == "dir" else int(size)
+    return root_dir
 
 
 def get_dir_sizes(name, a_dir):
@@ -23,10 +27,10 @@ def get_dir_sizes(name, a_dir):
             return sizes[name]
         total = 0
         for entry, val in a_dir.items():
-            if entry == "..":
+            if entry == UPDIR:
                 continue
-            if type(val) == dict:
-                fname = name + ("/" if name[-1] != "/" else "") + entry
+            if type(val) is dict:
+                fname = name + (PATH_SEP if name[-1] != PATH_SEP else "") + entry
                 total += _dir_size(fname, val)
             else:
                 total += val
@@ -39,12 +43,12 @@ def get_dir_sizes(name, a_dir):
 
 def process(file_system):
     # part 1
-    dirs = get_dir_sizes("/", file_system)
+    dirs = get_dir_sizes(ROOT, file_system)
     result = sum(s for s in dirs.values() if s <= 100000)
     print("part 1:", result)
     # part 2
     total_disk_space, required_space = 70000000, 30000000
-    free_space = total_disk_space - dirs["/"]
+    free_space = total_disk_space - dirs[ROOT]
     to_free = required_space - free_space
     result = sorted(s for s in dirs.values() if s >= to_free)[0]
     print("part 2:", result)
