@@ -23,8 +23,6 @@ def build_fs(data):
 
 def get_dir_sizes(name, a_dir):
     def _dir_size(name, a_dir):
-        if name in sizes:
-            return sizes[name]
         total = 0
         for entry, val in a_dir.items():
             if entry == UPDIR:
@@ -50,7 +48,7 @@ def process(file_system):
     total_disk_space, required_space = 70000000, 30000000
     free_space = total_disk_space - dirs[ROOT]
     to_free = required_space - free_space
-    result = sorted(s for s in dirs.values() if s >= to_free)[0]
+    result = min(s for s in dirs.values() if s >= to_free)
     print("part 2:", result)
 
 
