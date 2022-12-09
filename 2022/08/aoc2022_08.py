@@ -1,10 +1,9 @@
 # https://adventofcode.com/2022/day/8
-from pprint import pprint
 from pathlib import Path
 
 
 def make_visibility_map(grid):
-    visible = dict()
+    visible = set()
     size_y, size_x = len(grid), len(grid[0])
 
     def scan_horizontally(range_x, range_y, ):
@@ -13,7 +12,7 @@ def make_visibility_map(grid):
             for i in range_x:
                 tree = grid[j][i]
                 if tree > prev:
-                    visible[(j, i)] = True
+                    visible.add((j, i))
                 if tree == 9:
                     break
                 prev = max(tree, prev)
@@ -24,7 +23,7 @@ def make_visibility_map(grid):
             for j in range_y:
                 tree = grid[j][i]
                 if tree > prev:
-                    visible[(j, i)] = True
+                    visible.add((j, i))
                 if tree == 9:
                     break
                 prev = max(tree, prev)
@@ -60,8 +59,8 @@ def scenic_score(grid):
     # trees on the edges have score 0
     for j in range(1, size_y-1):
         for i in range(1, size_x-1):
-            tree, tree_score = grid[j][i], 1
-            tree_score *= seen_horizontally(tree, j, range(i+1, size_x))
+            tree = grid[j][i]
+            tree_score = seen_horizontally(tree, j, range(i+1, size_x))
             tree_score *= seen_horizontally(tree, j, range(i-1, -1, -1))
             tree_score *= seen_vertically(tree, i, range(j+1, size_y))
             tree_score *= seen_vertically(tree, i, range(j-1, -1, -1))
