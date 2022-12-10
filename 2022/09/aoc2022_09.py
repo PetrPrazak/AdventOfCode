@@ -3,11 +3,7 @@ from pathlib import Path
 
 
 def sign(num):
-    if num > 1:
-        return 1
-    if num < 1:
-        return -1
-    return 0
+    return (num > 0) - (num < 0)
 
 
 def move_tail(head, tail):
@@ -25,13 +21,13 @@ def move_tail(head, tail):
 def process_moves(data, size):
     directions = {'U': -1j, 'D': 1j, 'R': 1+0j, 'L': -1+0j}
     rope = [0j] * size
-    tails = {rope[size-1]}
+    tails = {rope[-1]}
     for dir, amount in data:
         for _ in range(amount):
             rope[0] += directions[dir]
             for pos in range(size-1):
                 rope[pos+1] = move_tail(rope[pos], rope[pos+1])
-            tails.add(rope[size-1])
+            tails.add(rope[-1])
     return len(tails)
 
 
