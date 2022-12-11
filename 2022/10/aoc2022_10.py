@@ -15,13 +15,13 @@ def execute_program(data):
 
 
 def process_signal(signal):
-    video_map = [[' '] * 40 for _ in range(6)]
+    video_map = [['  '] * 40 for _ in range(6)]
     for y in range(6):
         line, line_offset = video_map[y], 40 * y
         for x in range(40):
             sprite_pos = signal[line_offset + x]
             if sprite_pos-1 <= x <= sprite_pos+1:
-                line[x] = '#'
+                line[x] = '\u2588\u2588'
     return video_map
 
 
