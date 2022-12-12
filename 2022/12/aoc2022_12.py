@@ -25,15 +25,14 @@ def dijkstra(start, target, moves_f):
     return None
 
 
-def shortest_path(grid, start, target, height, width):
+def shortest_path(grid, start, target):
 
     def move(pos):
-        max_elevation = grid[pos] + 1
-        for x, y in neighbors4(pos):
-            if 0 <= x < width and 0 <= y < height:
-                new_elevation = grid[(x, y)]
-                if new_elevation <= max_elevation:
-                    yield x, y
+        elevation = grid[pos]
+        for new_pos in neighbors4(pos):
+            if (new_elevation := grid.get(new_pos)) is not None:
+                if elevation - new_elevation <= 1:
+                    yield new_pos
 
     return dijkstra(start, target, move)
 
@@ -44,38 +43,38 @@ def elevation(x):
 
 def find_start_target(grid):
     start = target = None
+    S, E = elevation('S'), elevation('E')
     for pos, val in grid.items():
-        if val == elevation('S'):
+        if val == S:
             start = pos
-        if val == elevation('E'):
+        if val == E:
             target = pos
         if start and target:
             break
     return start, target
 
 
-def process(data):
+def process(grid):
     # part 1
-    height, width = len(data), len(data[0])
-    grid = dict(((x, y), elevation(letter))
-                for y, line in enumerate(data)
-                for x, letter in enumerate(line))
     start, target = find_start_target(grid)
     grid[start] = elevation('a')
     grid[target] = elevation('z')
-    result = shortest_path(grid, start, target, height, width)
+    result = shortest_path(grid, target, start)
     print("part 1:", result)
     # part 2
     # all 'a' fields with 'b' as a neighbor
     starts = [pos for pos, val in grid.items()
               if val == 0 and any(grid.get(npos) == 1 for npos in neighbors4(pos))]
-    result = min(shortest_path(grid, start, target, height, width)
+    result = min(shortest_path(grid, target, start)
                  for start in starts)
     print("part 2:", result)
 
 
 def load_data(fileobj):
-    return [list(line.rstrip()) for line in fileobj.readlines()]
+    grid = dict(((x, y), elevation(letter))
+                for y, line in enumerate(fileobj)
+                for x, letter in enumerate(line.rstrip()))
+    return grid
 
 
 def main(file="input.txt"):
