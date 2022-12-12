@@ -17,22 +17,25 @@ def dijkstra(start, target, moves_f):
         total, current = heappop(pq)
         if current == target:
             return total
-        for neighbor in moves_f(current):
-            new_cost = path_cost[current] + 1
+        for neighbor, value in moves_f(current):
+            new_cost = path_cost[current] + value
             if new_cost < path_cost.get(neighbor, INFINITY):
                 heappush(pq, (new_cost, neighbor))
                 path_cost[neighbor] = new_cost
     return None
 
 
-def shortest_path(grid, start, target):
-
+def shortest_path(grid, start, target, part2=False):
+    if part2:
+        value_f = lambda a, b: int(a != 0 or b != 0)
+    else: 
+        value_f = lambda a,b: 1
     def move(pos):
         elevation = grid[pos]
         for new_pos in neighbors4(pos):
             if (new_elevation := grid.get(new_pos)) is not None:
                 if elevation - new_elevation <= 1:
-                    yield new_pos
+                    yield new_pos, value_f(elevation, new_elevation)
 
     return dijkstra(start, target, move)
 
@@ -62,11 +65,7 @@ def process(grid):
     result = shortest_path(grid, target, start)
     print("part 1:", result)
     # part 2
-    # all 'a' fields with 'b' as a neighbor
-    starts = [pos for pos, val in grid.items()
-              if val == 0 and any(grid.get(npos) == 1 for npos in neighbors4(pos))]
-    result = min(shortest_path(grid, target, start)
-                 for start in starts)
+    result = shortest_path(grid, target, start, part2=True)
     print("part 2:", result)
 
 
