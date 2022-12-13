@@ -32,9 +32,8 @@ def process(data):
                  if val == -1)
     print("part 1:", result)
     # part 2
-    packets = [packet for pair in data for packet in pair]
     div_packets = [[[2]], [[6]]]
-    packets += div_packets
+    packets = [packet for pair in data for packet in pair] + div_packets
     packets.sort(key=cmp_to_key(compare_lists))
     result = prod(idx for idx, packet in enumerate(packets, start=1)
                   if packet in div_packets)
