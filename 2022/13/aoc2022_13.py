@@ -8,44 +8,34 @@ from ast import literal_eval
 def compare_lists(l1, l2):
     for idx in range(max(len(l1), len(l2))):
         if idx == len(l1):
-            return True
+            return -1
         if idx == len(l2):
-            return False  # not right order
+            return 1
         item1, item2 = l1[idx], l2[idx]
         if type(item1) is int and type(item2) is int:
             if item1 != item2:
-                return item1 < item2
+                return -1 if item1 < item2 else 1
             continue
-        if type(item1) is not list:
+        if type(item1) is int:
             item1 = [item1]
-        if type(item2) is not list:
+        if type(item2) is int:
             item2 = [item2]
-        list_compare = compare_lists(item1, item2)
-        if list_compare is None:
-            continue
-        return list_compare
-    return None
-
-
-def packets_cmp(l1, l2):
-    if compare_lists(l1, l2):
-        return -1
-    if compare_lists(l2, l1):
-        return 1
+        if list_compare := compare_lists(item1, item2):
+            return list_compare
     return 0
 
 
 def process(data):
     # part 1
     result = sum(idx for idx, val in
-                 enumerate((compare_lists(l1, l2) for l1, l2 in data), start=1)
-                 if val)
+                 enumerate((compare_lists(*pair) for pair in data), start=1)
+                 if val == -1)
     print("part 1:", result)
     # part 2
     packets = [packet for pair in data for packet in pair]
     div_packets = [[[2]], [[6]]]
     packets += div_packets
-    packets.sort(key=cmp_to_key(packets_cmp))
+    packets.sort(key=cmp_to_key(compare_lists))
     result = prod(idx for idx, packet in enumerate(packets, start=1)
                   if packet in div_packets)
     print("part 2:", result)
