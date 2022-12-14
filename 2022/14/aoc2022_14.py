@@ -4,6 +4,7 @@ from itertools import pairwise
 from collections import deque
 from copy import deepcopy
 import re
+import time
 
 WALL, SAND, EMPTY = '#', 'o', '.'
 
@@ -71,7 +72,10 @@ def load_data(fileobj):
 def main(file="input.txt"):
     print(file)
     with Path(__file__).parent.joinpath(file).open() as f:
+        t1 = time.perf_counter()
         process(load_data(f))
+        t2 = time.perf_counter()
+        print(f"Finished in {t2 - t1:.3} s")
 
 
 if __name__ == "__main__":
