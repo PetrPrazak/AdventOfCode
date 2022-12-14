@@ -6,17 +6,14 @@ import re
 
 WALL, SAND, EMPTY = '#', 'o', '.'
 
+
 def build_grid(data):
     grid, max_depth = {}, 0
     for line in data:
         for (x1, y1), (x2, y2) in pairwise(line):
-            if x1 > x2:
-                x1, x2 = x2, x1
-            if y1 > y2:
-                y1, y2 = y2, y1
-            max_depth = max(max_depth, y2)
-            for x in range(x1, x2 + 1):
-                for y in range(y1, y2 + 1):
+            max_depth = max(max_depth, y1, y2)
+            for x in range(min(x1, x2), max(x1, x2) + 1):
+                for y in range(min(y1, y2), max(y1, y2) + 1):
                     grid[(x, y)] = WALL
     return grid, max_depth
 
@@ -31,10 +28,10 @@ def pour_sand(grid, max_depth, part=1):
     while True:
         pos_x, pos_y = 500, 0
         while pos_y <= max_depth:
-            for dx, dy in [(0,1), (-1, 1), (1, 1)]:
-                if grid_get((pos_x+dx, pos_y+dy)) == EMPTY:
+            for dx in (0, -1, 1):
+                if grid_get((pos_x+dx, pos_y+1)) == EMPTY:
                     pos_x += dx
-                    pos_y += dy
+                    pos_y += 1
                     break
             else:
                 break
@@ -62,7 +59,7 @@ def parse_line(line):
 
 
 def load_data(fileobj):
-    return [parse_line(line.rstrip()) for line in fileobj.readlines()]
+    return (parse_line(line.rstrip()) for line in fileobj.readlines())
 
 
 def main(file="input.txt"):
