@@ -1,6 +1,7 @@
 # https://adventofcode.com/2022/day/14
 from pathlib import Path
 from itertools import pairwise
+from collections import deque
 from copy import deepcopy
 import re
 
@@ -25,21 +26,26 @@ def pour_sand(grid, max_depth, part=1):
         return grid.get(pos, EMPTY)
 
     grid = deepcopy(grid)
-    while True:
-        pos_x, pos_y = 500, 0
+    path = deque((500, -1))
+    pos = 500, 0
+    while pos:
+        pos_x, pos_y = pos
         while pos_y <= max_depth:
             for dx in (0, -1, 1):
                 if grid_get((pos_x+dx, pos_y+1)) == EMPTY:
+                    path.append(pos)
                     pos_x += dx
                     pos_y += 1
+                    pos = pos_x, pos_y
                     break
             else:
                 break
         if pos_y > max_depth:
             break
-        grid[(pos_x, pos_y)] = SAND
+        grid[pos] = SAND
         if pos_y == 0:
             break
+        pos = path.pop()
     return sum(c == SAND for c in grid.values())
 
 
