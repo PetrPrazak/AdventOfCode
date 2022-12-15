@@ -1,4 +1,4 @@
-# {link}{year}/day/{day}
+# https://adventofcode.com/2022/day/16
 from pprint import pprint
 from pathlib import Path
 from functools import reduce, cache
