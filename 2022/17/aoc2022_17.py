@@ -110,10 +110,6 @@ def process(data):
     print("part 2:", result)
 
 
-def load_data(fileobj):
-    return fileobj.read()
-
-
 def main(file="input.txt"):
     print(file)
     with Path(__file__).parent.joinpath(file).open() as f:
