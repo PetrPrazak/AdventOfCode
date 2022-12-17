@@ -4,7 +4,7 @@
 # Author = Alexe Simon
 # Date = 06/12/2018
 # original code at https://github.com/AlexeSimon/adventofcode
-import datetime
+from string import Template
 import os
 import sys
 import re
@@ -32,7 +32,7 @@ starting_advent_of_code_year = 2022  # You can go as early as 2015.
 # The setup will download all advent of code data up until that date included
 last_advent_of_code_year = 2022
 # If the year isn't finished, the setup will download days up until that day included for the last year
-last_advent_of_code_day = 16
+last_advent_of_code_day = 17
 # Imports
 try:
     import requests
@@ -64,15 +64,18 @@ def get_template():
     with open(file) as templ:
         py_template = templ.read()
         return py_template
-    py_template = "# AOC {year}/{day}"
+    py_template = "# AOC $year/$day"
     return py_template
 
 
 def template(year, day):
-    link = aoc_link
-    templ_str = get_template()
-    return templ_str.replace("{link}", link).replace("{year}", f"{year}").replace("{day}", f"{day}")
-    return get_template().format(**locals())
+    templ = Template(get_template())
+    mapping = {
+        "link": aoc_link,
+        "year": year,
+        "day": day
+    }
+    return templ.substitute(mapping)
 
 
 def md_header(y, d):

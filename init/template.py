@@ -1,4 +1,4 @@
-# {link}{year}/day/{day}
+# $link$year/day/$day
 from pprint import pprint
 from pathlib import Path
 from functools import reduce, cache
