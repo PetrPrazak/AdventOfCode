@@ -32,7 +32,7 @@ starting_advent_of_code_year = 2022  # You can go as early as 2015.
 # The setup will download all advent of code data up until that date included
 last_advent_of_code_year = 2022
 # If the year isn't finished, the setup will download days up until that day included for the last year
-last_advent_of_code_day = 17
+last_advent_of_code_day = 18
 # Imports
 try:
     import requests
@@ -126,7 +126,7 @@ for y in years:
                             with open(day_pos+"/input.txt", "w+") as input:
                                 input.write(data.rstrip("\n"))
                             with open(day_pos+"/test.txt", "w+") as test:
-                                test.write("\n")
+                                pass
                         else:
                             print("        Server response for input is not valid.")
                     done = True
