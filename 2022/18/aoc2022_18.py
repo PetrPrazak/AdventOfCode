@@ -5,7 +5,7 @@ from collections import deque
 import time
 
 
-def surfaces(x, y, z):
+def get_surfaces(x, y, z):
     return {
         'x': {(x-1, y, z), (x, y, z)},
         'y': {(x, y-1, z), (x, y, z)},
@@ -13,7 +13,7 @@ def surfaces(x, y, z):
     }
 
 
-def adjacent(x, y, z):
+def get_adjacent(x, y, z):
     return (
         (x-1, y, z), (x+1, y, z),
         (x, y-1, z), (x, y+1, z),
@@ -22,7 +22,7 @@ def adjacent(x, y, z):
 
 
 def unique_surfaces(surfaces, cubes):
-    for cube_surface in (surfaces(*c) for c in cubes):
+    for cube_surface in (get_surfaces(*c) for c in cubes):
         for axis, surface in surfaces.items():
             surfaces[axis] = surface.symmetric_difference(cube_surface[axis])
 
@@ -42,7 +42,7 @@ def fill_steam(cubes):
         if voxel in visited:
             continue
         visited.add(voxel)
-        for adj in adjacent(*voxel):
+        for adj in get_adjacent(*voxel):
             if adj in grid and adj not in visited and adj not in cubes_set:
                 queue.append(adj)
 
