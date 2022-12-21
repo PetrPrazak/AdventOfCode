@@ -19,8 +19,6 @@ def eval_monkeys(data):
 
 def reduce_monkeys(data):
     def monkey(m):
-        if m not in data:
-            return m
         args = data[m]
         if not isinstance(args, tuple):
             return args
@@ -68,12 +66,7 @@ def process(data):
 
 def parse_line(line):
     left, expr = line.split(': ')
-    arg, *args = expr.split(' ')
-    if not args:
-        return left, int(arg)
-    else:
-        op, r = args
-        return left, (arg, op, r)
+    return left, int(expr) if expr[0].isdigit() else tuple(expr.split(' '))
 
 
 def load_data(fileobj):
