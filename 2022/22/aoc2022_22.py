@@ -114,9 +114,8 @@ def cube_wrap_pos(size, pos, facing):
 def walk_grid(grid, start_pos, path, part=1):
     facing = 1 + 0j
     pos = start_pos
-    width, height = int(max(p.real for p in grid) + 1), int(
-        max(p.imag for p in grid) + 1
-    )
+    width = int(max(p.real for p in grid) + 1)
+    height = int(max(p.imag for p in grid) + 1)
     cols = 3 if width < height else 4
     size = width // cols, cols
     print(f"{size=}")
@@ -131,9 +130,6 @@ def walk_grid(grid, start_pos, path, part=1):
                     next_facing = facing
                 else:
                     next_pos, next_facing = cube_wrap_pos(size, pos, facing)
-                assert (
-                    next_pos in grid
-                ), f"{pos=}, {next_pos=}, {facing=}, {next_facing=}"
                 if grid[next_pos] == "#":
                     break
                 facing = next_facing
