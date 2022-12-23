@@ -1,5 +1,4 @@
 # https://adventofcode.com/2022/day/16
-from pprint import pprint
 from pathlib import Path
 from itertools import combinations
 import time
