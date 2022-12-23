@@ -10,7 +10,7 @@ NORTH = (-1 - 1j, -1j, 1 - 1j)
 SOUTH = (-1 + 1j, 1j, 1 + 1j)
 WEST = (-1 + 1j, -1 + 0j, -1 - 1j)
 EAST = (1 + 1j, 1 + 0j, 1 - 1j)
-DIRS = [NORTH, SOUTH, EAST, WEST]
+DIRS = [NORTH, SOUTH, WEST, EAST]
 AROUND = {off for d in DIRS for off in d}
 
 
@@ -20,21 +20,17 @@ def is_around(data, elf, side=None):
     return any(elf + off in data for off in side)
 
 
-# north, south, west, east
-MOVES = [(NORTH, -1j), (SOUTH, 1j), (WEST, -1 + 0j), (EAST, 1 + 0j)]
-
-
 def round(data, round_num):
     candidates = defaultdict(set)
-    d_idx = round_num % len(MOVES)
-    directions = MOVES[d_idx:] + MOVES[:d_idx]
+    d_idx = round_num % len(DIRS)
+    directions = DIRS[d_idx:] + DIRS[:d_idx]
     for elf in data:
         if not is_around(data, elf):
             continue
-        for side, off in directions:
-            newpos = elf + off
+        for side in directions:
             if is_around(data, elf, side):
                 continue
+            newpos = elf + side[1]
             if newpos not in data:
                 candidates[newpos].add(elf)
                 break
