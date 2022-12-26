@@ -43,7 +43,7 @@ def main(file="input.txt"):
         t1 = time.perf_counter()
         process(load_data(f))
         t2 = time.perf_counter()
-        print(f"Finished in {t2 - t1:.3} s")
+        print(f"Finished in {t2 - t1:.3f} s")
 
 
 if __name__ == "__main__":
