@@ -94,6 +94,9 @@ def make_md(text):
 
 
 print("Setup will download data and create working directories and files for adventofcode.")
+if not session_id:
+    print("Warning: No session id set up!")
+
 if not os.path.exists(base_pos):
     os.mkdir(base_pos)
 for y in years:
