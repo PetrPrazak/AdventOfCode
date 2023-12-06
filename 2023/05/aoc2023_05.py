@@ -40,7 +40,7 @@ def part2(seeds, mappings):
                 partial_left = c <= a < d
                 partial_right = c < b <= d
 
-                if partial_left and partial_right:  
+                if partial_left and partial_right:
                     # Complete overlap:
                     #     a---b
                     # c-----------d
@@ -63,7 +63,7 @@ def part2(seeds, mappings):
                     processed.append((c + delta, b + delta))
                     segments.append((a, c))
                     break
-                if a < c and b > d:  
+                if a < c and b > d:
                     # Partial inner overlap:
                     # a-----------b
                     #     c---d
