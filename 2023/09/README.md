@@ -29,7 +29,8 @@ In the above dataset, the first history is `0 3 6 9 12 15`. Because the values i
   3   3   3   3   3
     0   0   0   0
 ```
-To extrapolate, start by adding a new zero to the end of your list of zeroes; because the zeroes represent differences between the two values above them, this also means there is now a placeholder in every sequence above it:```
+To extrapolate, start by adding a new zero to the end of your list of zeroes; because the zeroes represent differences between the two values above them, this also means there is now a placeholder in every sequence above it:
+```
 0   3   6   9  12  15   B
   3   3   3   3   3   A
     0   0   0   0   0
@@ -83,10 +84,6 @@ If you find the next value for each history in this example and add them togethe
 
 Analyze your OASIS report and extrapolate the next value for each history. **What is the sum of these extrapolated values?**
 
-
-
-
-
 Your puzzle answer was `2098530125`.
 
 ## Part Two
@@ -98,7 +95,11 @@ For each history, repeat the process of finding differences until the sequence o
 In particular, here is what the third example history looks like when extrapolating back in time:
 
 ```
-**`5`** 10 13 16 21 30 45 **5** 3 3 5 9 15 **-2** 0 2 4 6 **2** 2 2 2 **0** 0 0
+5 10 13 16 21 30 45 
+ 5  3  3  5  9 15 
+ -2  0  2  4  6
+   2  2  2  2 
+    0  0  0
 ```
 Adding the new values on the left side of each sequence from bottom to top eventually reveals the new left-most history value: **`5`**.
 
