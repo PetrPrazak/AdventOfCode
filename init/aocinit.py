@@ -32,7 +32,7 @@ starting_advent_of_code_year = 2023  # You can go as early as 2015.
 # The setup will download all advent of code data up until that date included
 last_advent_of_code_year = 2023
 # If the year isn't finished, the setup will download days up until that day included for the last year
-last_advent_of_code_day = 4
+last_advent_of_code_day = 20
 # Imports
 try:
     import requests
