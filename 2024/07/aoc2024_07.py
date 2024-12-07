@@ -1,6 +1,9 @@
 # https://adventofcode.com/2024/day/7
 from pathlib import Path
 import time
+from math import log10
+
+def join(a, b): return a * 10 ** int(log10(b) + 1) + b
 
 
 def try_operators(res, nums, part=1):
@@ -15,7 +18,7 @@ def try_operators(res, nums, part=1):
             if rmul <= res:
                 newstack.append(rmul)
             if part == 2:
-                rconcat = int(str(r)+str(n))
+                rconcat = join(r, n)
                 if rconcat <= res:
                     newstack.append(rconcat)
         stack = newstack
@@ -24,10 +27,17 @@ def try_operators(res, nums, part=1):
 
 def process(data):
     # part 1
-    result = sum(res for res, nums in data if try_operators(res, nums))
+    result = 0
+    rest = []
+    for res, nums in data:
+        if try_operators(res, nums):
+            result += res
+        else:
+            rest.append((res, nums))
     print("part 1:", result)
+
     # part 2
-    result = sum(res for res, nums in data if try_operators(res, nums, part=2))
+    result += sum(res for res, nums in rest if try_operators(res, nums, part=2))
     print("part 2:", result)
 
 
