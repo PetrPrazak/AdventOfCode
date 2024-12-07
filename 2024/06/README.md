@@ -134,7 +134,9 @@ Option one, put a printing press next to the guard's starting position:
 #.........
 ......#...
 ```
-Option two, put a stack of failed suit prototypes in the bottom right quadrant of the mapped area:```
+Option two, put a stack of failed suit prototypes in the bottom right quadrant of the mapped area:
+
+```
 ....#.....
 ....+---+#
 ....|...|.
