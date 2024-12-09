@@ -106,9 +106,8 @@ def process(data):
     # part 2
     files = make_files(blocks)
     part2(files)
-    # print(files)
     print("part 2:", checksum_files(files))
-    print(f"{inserts=}")
+
 
 def load_data(fileobj):
     return fileobj.read()
