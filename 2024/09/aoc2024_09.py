@@ -1,15 +1,7 @@
 # https://adventofcode.com/2024/day/9
-from pprint import pprint
 from pathlib import Path
-from functools import reduce, cache
-from operator import mul
-from collections import Counter, defaultdict, deque
-from itertools import permutations, combinations, islice
-from string import whitespace, digits
-from copy import copy, deepcopy
-from math import prod
+from copy import copy
 import time
-import re
 
 EMPTY = -1
 
@@ -73,18 +65,19 @@ def part2(files):
             last_file_pos -= 1
             continue
 
+        # move a file to the free block
         files[free_pos] = file, file_len
         files[last_file_pos] = EMPTY, file_len
 
         if free_len > file_len:
             #if a free space left, merge it or add a new one
             empty_len = free_len - file_len
-            t, l = files[free_pos + 1]
+            free_pos += 1
+            t, l = files[free_pos]
             if t == EMPTY:
-                files[free_pos + 1] = EMPTY, l + empty_len
+                files[free_pos] = EMPTY, l + empty_len
             else:
-                files.insert(free_pos + 1, (EMPTY, empty_len))
-                free_pos += 1
+                files.insert(free_pos, (EMPTY, empty_len))
                 last_file_pos += 1
 
         last_file_pos -= 1
@@ -115,7 +108,7 @@ def process(data):
     part2(files)
     # print(files)
     print("part 2:", checksum_files(files))
-
+    print(f"{inserts=}")
 
 def load_data(fileobj):
     return fileobj.read()
