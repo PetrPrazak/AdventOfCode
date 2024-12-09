@@ -5,11 +5,11 @@ from itertools import combinations
 import time
 
 
-def count_nodes(antenae, height, width, part=1):
+def count_nodes(antennas, height, width, part=1):
     def in_range(pos):
         return pos.real in range(height) and pos.imag in range(width)
     antinodes = set()
-    for positions in antenae.values():
+    for positions in antennas.values():
         for a1, a2 in combinations(positions, 2):
             da = a1 - a2
             for node, step in ((a1, da), (a2, -da)):
@@ -26,18 +26,18 @@ def count_nodes(antenae, height, width, part=1):
 
 def process(data):
     height, width = len(data), len(data[0])
-    antenae = defaultdict(list)
+    antennas = defaultdict(list)
     for r, row in enumerate(data):
         for c, a in enumerate(row):
             if a != '.':
-                antenae[a].append(complex(r, c))
+                antennas[a].append(complex(r, c))
 
     # part 1
-    result = count_nodes(antenae, height, width)
+    result = count_nodes(antennas, height, width)
     print("part 1:", result)
 
     # part 2
-    result = count_nodes(antenae, height, width, part=2)
+    result = count_nodes(antennas, height, width, part=2)
     print("part 2:", result)
 
 
