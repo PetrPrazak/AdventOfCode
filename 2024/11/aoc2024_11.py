@@ -1,6 +1,6 @@
 # https://adventofcode.com/2024/day/11
 from pathlib import Path
-from collections import defaultdict
+from collections import defaultdict, Counter
 from math import log10
 import time
 
@@ -22,8 +22,8 @@ def process_stones(stones):
 
 
 def solve(data, loops):
-    stones = {s: 1 for s in data}
-    for i in range(loops):
+    stones = Counter(data)
+    for _ in range(loops):
         stones = process_stones(stones)
     return sum(x for x in stones.values())
 
