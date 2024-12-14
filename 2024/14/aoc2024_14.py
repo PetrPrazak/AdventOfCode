@@ -23,9 +23,9 @@ def quadrant(size, pos):
 
 
 def print_map(size, robots):
-    for r in range(size[1]):
+    for c in range(size[0]):
         print("".join('#' if (r, c)
-              in robots else '·' for c in range(size[0])))
+              in robots else '·' for r in range(size[1])))
     print()
 
 
