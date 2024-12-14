@@ -1,6 +1,6 @@
 # https://adventofcode.com/2024/day/14
 from pathlib import Path
-from collections import Counter, defaultdict
+from collections import Counter
 import time
 import re
 
@@ -24,8 +24,8 @@ def quadrant(size, pos):
 
 def print_map(size, robots):
     for c in range(size[0]):
-        print("".join('#' if (r, c)
-              in robots else '·' for r in range(size[1])))
+        print("".join('#' if (r, c) in robots else '·'
+                      for r in range(size[1])))
     print()
 
 
