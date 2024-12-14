@@ -29,25 +29,6 @@ def print_map(size, robots):
     print()
 
 
-def has_line(robots):
-    lines = defaultdict(list)
-    for r, c in robots:
-        lines[r].append(c)
-    for _, line in lines.items():
-        maxc = 0
-        last_c = 9999
-        countc = 1
-        for c in sorted(line):
-            if c != last_c+1:
-                maxc = max(maxc, countc)
-            else:
-                countc += 1
-            last_c = c
-        if maxc > 30:
-            return True
-    return False
-
-
 def process(data, size):
     robots = [count_pos(size, 100, *p) for p in data]
     cnt = Counter(quadrant(size, r) for r in robots)
@@ -55,13 +36,12 @@ def process(data, size):
     result = cnt[0] * cnt[1] * cnt[2] * cnt[3]
     print("part 1:", result)
     # part 2
-    print("part 2")
     for t in range(10000):
         robots = set(count_pos(size, t, *p) for p in data)
-        if has_line(robots):
-            print(f"Tick {t}")
-            print_map(size, robots)
+        if len(robots) == len(data):
+            # print_map(size, srobots)
             break
+    print("part 2:", t)
 
 
 def parse_line(line):
