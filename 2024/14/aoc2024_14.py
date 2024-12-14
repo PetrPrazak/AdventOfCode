@@ -2,6 +2,7 @@
 from pathlib import Path
 from collections import Counter
 import time
+from math import prod
 import re
 
 
@@ -33,13 +34,13 @@ def process(data, size):
     robots = [count_pos(size, 100, *p) for p in data]
     cnt = Counter(quadrant(size, r) for r in robots)
     # part 1
-    result = cnt[0] * cnt[1] * cnt[2] * cnt[3]
+    result = prod(cnt[q] for q in range(4))
     print("part 1:", result)
     # part 2
-    for t in range(10000):
+    for t in range(1,prod(size)+1):
         robots = set(count_pos(size, t, *p) for p in data)
         if len(robots) == len(data):
-            # print_map(size, srobots)
+            # print_map(size, robots)
             break
     print("part 2:", t)
 
