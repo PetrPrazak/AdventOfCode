@@ -3,6 +3,7 @@ from pathlib import Path
 import time
 from heapq import heappush, heappop
 from math import inf as INFINITY
+import networkx as nx
 
 
 def neighbors4(point):
@@ -40,7 +41,7 @@ def shortest_path(grid, start, target):
     def endpos(curr, target):
         return curr[0] == target[0]
 
-    return dijkstra((start, (0,1)), (target, (0,0)), move, endpos)
+    return dijkstra((start, (0, 1)), (target, (0, 0)), move, endpos)
 
 
 def print_grid(grid, prev=None):
@@ -49,9 +50,35 @@ def print_grid(grid, prev=None):
     if not prev:
         prev = dict()
     for r in range(H):
-        line = "".join("O" if (r, c) in prev else grid[(r,c)] for c in range(W))
+        line = "".join(
+            "O" if (r, c) in prev else grid[(r, c)] for c in range(W))
         print(line)
     print()
+
+
+def use_bigger_hammer(data):
+    g = {(x, y): c
+         for y, r in enumerate(data)
+         for x, c in enumerate(r)}
+    s = min(k for k, v in g.items() if v == 'S')
+    e = min(k for k, v in g.items() if v == 'E')
+
+    n = nx.DiGraph()
+    for (x, y), c in g.items():
+        if c != '#':
+            for d in range(4):
+                dx, dy = [(1, 0), (0, 1), (-1, 0), (0, -1)][d]
+                n.add_edge((x, y, d), (x + dx, y + dy, d), weight=1)
+                n.add_edge((x, y, d), (x, y, (d - 1) % 4), weight=1000)
+                n.add_edge((x, y, d), (x, y, (d + 1) % 4), weight=1000)
+
+    m = [nx.shortest_path_length(n, (*s, 0), (*e, d), "weight")
+         for d in range(4)]
+    all_paths = nx.all_shortest_paths(n, (*s, 0), (*e, d), "weight")
+    cells = len(set(tuple(p) for d in range(4) if m[d] == min(m)
+                    for t in all_paths
+                    for *p, h in t))
+    return min(m), cells
 
 
 def process(data):
@@ -67,7 +94,9 @@ def process(data):
     result = shortest_path(grid, start, end)
     print("part 1:", result)
     # part 2
-    print("part 2:", result)
+    part1, part2 = use_bigger_hammer(data)
+    print("part 1:", part1)
+    print("part 2:", part2)
 
 
 def load_data(fileobj):
