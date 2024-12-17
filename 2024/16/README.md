@@ -98,8 +98,6 @@ Analyze your map carefully. **What is the lowest score a Reindeer could possibly
 
 Your puzzle answer was `83432`.
 
-The first half of this puzzle is complete! It provides one gold star: *
-
 ## Part Two
 
 Now that you know what the best paths look like, you can figure out the best spot to sit.
@@ -149,4 +147,6 @@ In the second example, there are **`64`** tiles that are part of at least one of
 #################
 ```
 Analyze your map further. **How many tiles are part of at least one of the best paths through the maze?**
+
+Your puzzle answer was `467`.
 
