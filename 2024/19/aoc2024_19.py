@@ -20,22 +20,12 @@ def process(data):
     towels, patterns = data
     towels = set(towels)
     maxlen = max(map(len, towels))
-    # return
     # part 1
     result = sum(check_towels(towels, maxlen, p) > 0 for p in patterns)
     print("part 1:", result)
     # part 2
     result = sum(check_towels(towels, maxlen, p) for p in patterns)
     print("part 2:", result)
-
-
-def parse_line(line):
-    return line
-
-
-def parse_section(section):
-    header, *section = section
-    return header.rstrip(), section.split("\n")
 
 
 def load_data(fileobj):
