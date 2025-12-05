@@ -15,28 +15,12 @@ def part1(ranges, ids):
 
 
 def part2(ranges):
-    def sum_range(s, e): return e - s + 1
     acc = 0
-    p_s, p_e = None, None
-    for s, e in sorted(ranges):
-        if p_s is None:
-            p_s, p_e = s, e
-            continue
-        if s > p_e:
-            # non-overlapping range
-            acc += sum_range(p_s, p_e)
-            p_s, p_e = s, e
-        else:
-            if e > p_e:
-                # overlapping partially
-                acc += sum_range(p_s, s)
-                p_s, p_e = s + 1, e
-            else:
-                # overlapping totally, can be ignored
-                pass
-    # last segment
-    if p_s is not None:
-        acc += sum_range(p_s, p_e)
+    end_max = 0
+    for start, end in sorted(ranges):
+        if end >= end_max:
+            acc += end - max(start, end_max) + 1
+            end_max = end + 1
     return acc
 
 
