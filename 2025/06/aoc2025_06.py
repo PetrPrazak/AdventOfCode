@@ -49,7 +49,7 @@ def parse_line(line):
 
 def load_data(fileobj):
     lines = fileobj.read().split('\n')
-    part1 = list(map(parse_line, lines))
+    part1 = map(parse_line, lines)
     return part1, lines
 
 
