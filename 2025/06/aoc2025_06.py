@@ -48,10 +48,9 @@ def parse_line(line):
 
 
 def load_data(fileobj):
-    part1 = [parse_line(line.rstrip()) for line in fileobj.readlines()]
-    fileobj.seek(0)
-    part2 = [line.rstrip('\n') for line in fileobj.readlines()]
-    return part1, part2
+    lines = fileobj.read().split('\n')
+    part1 = list(map(parse_line, lines))
+    return part1, lines
 
 
 def main(file="input.txt"):
