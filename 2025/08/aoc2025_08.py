@@ -1,37 +1,29 @@
 # https://adventofcode.com/2025/day/8
 from pathlib import Path
+from collections import Counter, defaultdict, deque
 from itertools import combinations
-from math import prod, sqrt
+from math import prod
 import time
 
 
-def distance(p1, p2):
-    return sqrt(sum((l - r) ** 2 for l, r in zip(p1, p2)))
+def distance(pair):
+    # return value should be sqrt-ed, but we are using it only
+    # for sorting
+    return sum((l - r) ** 2 for l, r in zip(*pair))
 
 
 def part1_and_2(data: list[tuple], max_pairs: int):
     part1_ret, part2_ret = None, None
-    circuits = [{p} for p in data]
-    dist = sorted((distance(p1, p2), p1, p2) for p1, p2 in combinations(data, 2))
 
-    for di, (_, p1, p2) in enumerate(dist):
-        p1_i = p2_i = None
-        for i, circuit in enumerate(circuits):
-            if p1 in circuit:
-                p1_i = i
-            if p2 in circuit:
-                p2_i = i
+    pairs = sorted(combinations(data, 2), key=distance)
+    circuits = {frozenset({p}) for p in data}
 
-        match (p1_i, p2_i):
-            case (None, None):
-                assert False
-            case (_, None):
-                circuits[p1_i].add(p2)
-            case (None, _):
-                circuits[p2_i].add(p1)
-            case (_, _) if p1_i != p2_i:
-                circuits[p1_i].update(circuits[p2_i])
-                del circuits[p2_i]
+    def find_circuit(point):
+        return next(c for c in circuits if point in c)
+
+    for di, (p1, p2) in enumerate(pairs):
+        c1, c2 = find_circuit(p1), find_circuit(p2)
+        circuits = circuits - {c1, c2} | {c1|c2}
 
         if di + 1 == max_pairs:
             cl_len = sorted((len(c) for c in circuits), reverse=True)[:3]
