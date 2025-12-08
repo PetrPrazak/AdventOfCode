@@ -1,21 +1,14 @@
 # https://adventofcode.com/2025/day/8
 from pathlib import Path
-from collections import Counter, defaultdict, deque
 from itertools import combinations
-from math import prod
+from math import prod, dist
 import time
-
-
-def distance(pair):
-    # return value should be sqrt-ed, but we are using it only
-    # for sorting
-    return sum((l - r) ** 2 for l, r in zip(*pair))
 
 
 def part1_and_2(data: list[tuple], max_pairs: int):
     part1_ret, part2_ret = None, None
 
-    pairs = sorted(combinations(data, 2), key=distance)
+    pairs = sorted(combinations(data, 2), key=lambda x: dist(*x))
     circuits = {frozenset({p}) for p in data}
 
     def find_circuit(point):
