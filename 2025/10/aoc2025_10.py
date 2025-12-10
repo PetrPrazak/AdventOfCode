@@ -1,16 +1,8 @@
 # https://adventofcode.com/2025/day/10
 from z3 import *
-from pprint import pprint
 from pathlib import Path
-from functools import reduce, cache
-from operator import mul
-from collections import Counter, defaultdict, deque
-from itertools import permutations, combinations, islice
-from string import whitespace, digits
-from copy import copy, deepcopy
-from math import prod
+from collections import deque
 import time
-import re
 
 
 def switch_light(light, toggle):
@@ -49,7 +41,8 @@ def shortest_path(start, target, buttons, next_state):
 
 
 def part1(data):
-    return sum(shortest_path(tuple([0] * len(lights)), lights, buttons, toggle_lights) for lights, buttons, _ in data)
+    return sum(shortest_path(tuple([0] * len(lights)), lights, buttons, toggle_lights)
+               for lights, buttons, _ in data)
 
 
 # Source - https://stackoverflow.com/a/70656700
@@ -123,5 +116,5 @@ def main(file="input.txt"):
 
 
 if __name__ == "__main__":
-    main("test.txt")
+    # main("test.txt")
     main()
