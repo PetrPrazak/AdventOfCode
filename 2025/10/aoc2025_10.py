@@ -5,31 +5,19 @@ from collections import deque
 import time
 
 
-def switch_light(light, toggle):
-    if not toggle:
-        return light
-    return 1 if light == 0 else 0
+def toggle_lights(lights, button):
+    return tuple(not l if i in button else l for i, l in enumerate(lights))
 
 
-def toggle_lights(lights, _, button):
-    return tuple(switch_light(l, i in button) for i, l in enumerate(lights))
-
-
-def update_jolts(joltage, target, button):
-    if any(j1 > j2 for j1, j2 in zip(joltage, target)):
-        return None
-    return tuple((j + 1) if i in button else j for i, j in enumerate(joltage))
-
-
-def shortest_path(start, target, buttons, next_state):
+def shortest_path(start, target, buttons):
     previous = {start: None}
     q = deque()
     q.append(start)
     while q:
         state = q.popleft()
         for button in buttons:
-            next = next_state(state, target, button)
-            if next and next not in previous:
+            next = toggle_lights(state, button)
+            if next not in previous:
                 previous[next] = state
                 q.append(next)
     # count path length
@@ -41,7 +29,7 @@ def shortest_path(start, target, buttons, next_state):
 
 
 def part1(data):
-    return sum(shortest_path(tuple([0] * len(lights)), lights, buttons, toggle_lights)
+    return sum(shortest_path(tuple([False] * len(lights)), lights, buttons)
                for lights, buttons, _ in data)
 
 
@@ -95,7 +83,7 @@ def process(data):
 
 def parse_line(line):
     lights, *buttons, joltage = line.split(' ')
-    lights = tuple(0 if c == '.' else 1 for c in lights if c in ['.', '#'])
+    lights = tuple(c == '#' for c in lights if c in ['.', '#'])
     buttons = set(frozenset(int(b)
                   for b in bb[1:-1].split(',')) for bb in buttons)
     joltage = tuple(int(j) for j in joltage[1:-1].split(','))
