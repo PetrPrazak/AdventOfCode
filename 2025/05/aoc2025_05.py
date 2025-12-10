@@ -4,8 +4,8 @@ import time
 
 
 def check_id(ranges, id):
-    for s, e in ranges:
-        if id in range(s, e+1):
+    for start, end in ranges:
+        if id in range(start, end+1):
             return True
     return False
 
