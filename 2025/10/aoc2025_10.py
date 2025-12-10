@@ -33,34 +33,10 @@ def part1(data):
                for lights, buttons, _ in data)
 
 
-# Source - https://stackoverflow.com/a/70656700
-# Posted by alias, modified by community. See post 'Timeline' for change history
-# Retrieved 2025-12-10, License - CC BY-SA 4.0
-def all_smt(s, initial_terms):
-    def block_term(s, m, t):
-        s.add(t != m.eval(t, model_completion=True))
-
-    def fix_term(s, m, t):
-        s.add(t == m.eval(t, model_completion=True))
-
-    def all_smt_rec(terms):
-        if sat == s.check():
-            m = s.model()
-            yield m
-            for i in range(len(terms)):
-                s.push()
-                block_term(s, m, terms[i])
-                for j in range(i):
-                    fix_term(s, m, terms[j])
-                yield from all_smt_rec(terms[i:])
-                s.pop()
-    yield from all_smt_rec(list(initial_terms))
-
-
 def part2(data):
     acc = 0
     for _, buttons, joltage in data:
-        s = Solver()
+        s = Optimize()
         C = IntVector('press', len(buttons))
         for c in C:
             # don't allow negative results
@@ -68,7 +44,11 @@ def part2(data):
         for counter, jolt in enumerate(joltage):
             s.add(Sum([C[i] for i, button in enumerate(buttons) if counter in button])
                   == jolt)
-        acc += min(sum(m[v].as_long() for v in m) for m in all_smt(s, C))
+        s.minimize(Sum(C))
+        assert s.check() == sat
+        m = s.model()
+        acc += sum(m[v].as_long() for v in m)
+
     return acc
 
 
@@ -104,5 +84,5 @@ def main(file="input.txt"):
 
 
 if __name__ == "__main__":
-    # main("test.txt")
+    main("test.txt")
     main()
